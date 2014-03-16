@@ -150,7 +150,7 @@ main (int   argc,
          g_printerr ("fig: There is a problem with your installation of the "
                      "'%s' command.\n", command_name);
       } else {
-         ret = fig_command_run (command, argc, argv);
+         ret = fig_command_run (command, gDirectory, argc, argv);
          g_object_unref (command);
       }
    }

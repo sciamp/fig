@@ -25,9 +25,11 @@ G_DEFINE_TYPE (FigCommandInfo, fig_command_info, G_TYPE_INITIALLY_UNOWNED)
 
 struct _FigCommandInfoPrivate
 {
-   GType  command_type;
-   gchar *description;
-   gchar *name;
+   FigCommandFactory  factory;
+   gpointer           factory_data;
+   GType              command_type;
+   gchar             *description;
+   gchar             *name;
 };
 
 enum
@@ -39,20 +41,21 @@ enum
    LAST_PROP
 };
 
-enum
-{
-   CREATE,
-   LAST_SIGNAL
-};
-
 static GHashTable *gCommandInfos;
 static GParamSpec *gParamSpecs[LAST_PROP];
-static guint       gSignals [LAST_SIGNAL];
 
 static FigCommand *
 fig_command_info_real_create (FigCommandInfo *info)
 {
+   FigCommandInfoPrivate *priv;
+
    g_return_val_if_fail (FIG_IS_COMMAND_INFO (info), NULL);
+
+   priv = info->priv;
+
+   if (priv->factory) {
+      return priv->factory (info, priv->factory_data);
+   }
 
    if (g_type_is_a (info->priv->command_type, FIG_TYPE_COMMAND)) {
       return g_object_new (info->priv->command_type, NULL);
@@ -64,10 +67,20 @@ fig_command_info_real_create (FigCommandInfo *info)
 FigCommand *
 fig_command_info_create (FigCommandInfo *info)
 {
-   FigCommand *command = NULL;
    g_return_val_if_fail (FIG_IS_COMMAND_INFO (info), NULL);
-   g_signal_emit (info, gSignals [CREATE], 0, &command);
-   return command;
+
+   return FIG_COMMAND_INFO_GET_CLASS (info)->create (info);
+}
+
+void
+fig_command_info_set_factory (FigCommandInfo    *info,
+                              FigCommandFactory  factory,
+                              gpointer           user_data)
+{
+   g_return_if_fail (FIG_IS_COMMAND_INFO (info));
+
+   info->priv->factory = factory;
+   info->priv->factory_data = user_data;
 }
 
 const gchar *
@@ -215,16 +228,6 @@ fig_command_info_class_init (FigCommandInfoClass *klass)
                             G_PARAM_STATIC_STRINGS));
    g_object_class_install_property (object_class, PROP_NAME,
                                     gParamSpecs [PROP_NAME]);
-
-   gSignals [CREATE] = g_signal_new ("create",
-                                     FIG_TYPE_COMMAND_INFO,
-                                     G_SIGNAL_RUN_LAST,
-                                     G_STRUCT_OFFSET (FigCommandInfoClass, create),
-                                     NULL,
-                                     NULL,
-                                     g_cclosure_marshal_generic,
-                                     FIG_TYPE_COMMAND,
-                                     0);
 
    gCommandInfos = g_hash_table_new_full (g_str_hash,
                                           g_str_equal,

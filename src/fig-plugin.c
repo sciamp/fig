@@ -69,7 +69,7 @@ fig_plugin_load (FigPlugin  *plugin,
                  GError    **error)
 {
    FigPluginPrivate *priv;
-   void (*fig_init) (void) = NULL;
+   void (*load) (void) = NULL;
 
    g_return_val_if_fail (FIG_IS_PLUGIN (plugin), NULL);
 
@@ -93,18 +93,18 @@ fig_plugin_load (FigPlugin  *plugin,
       return FALSE;
    }
 
-   if (!g_module_symbol (priv->module, "fig_init", (gpointer *)&fig_init)) {
+   if (!g_module_symbol (priv->module, "fig_plugin_load", (gpointer *)&load)) {
       g_module_close (priv->module);
       priv->module = NULL;
       g_set_error (error,
                    G_IO_ERROR,
                    G_IO_ERROR_FAILED,
-                   "Failed to locate symbol fig_init: %s",
+                   "Failed to locate symbol fig_plugin_load: %s",
                    priv->path);
       return FALSE;
    }
 
-   fig_init ();
+   load ();
 
    return TRUE;
 }

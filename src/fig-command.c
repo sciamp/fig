@@ -31,13 +31,17 @@ enum
 static guint gSignals [LAST_SIGNAL];
 
 gint
-fig_command_run (FigCommand  *command,
-                 gint         argc,
-                 gchar      **argv)
+fig_command_run (FigCommand   *command,
+                 const gchar  *project_dir,
+                 gint          argc,
+                 gchar       **argv)
 {
-   gint ret = 0;
+   gint ret = -1;
+
    g_return_val_if_fail (FIG_IS_COMMAND(command), -1);
-   g_signal_emit (command, gSignals [RUN], 0, argc, argv, &ret);
+
+   g_signal_emit (command, gSignals [RUN], 0, project_dir, argc, argv, &ret);
+
    return ret;
 }
 
@@ -46,13 +50,14 @@ fig_command_class_init (FigCommandClass *klass)
 {
    gSignals [RUN] = g_signal_new ("run",
                                   FIG_TYPE_COMMAND,
-                                  G_SIGNAL_RUN_FIRST,
+                                  G_SIGNAL_RUN_LAST,
                                   G_STRUCT_OFFSET (FigCommandClass, run),
-                                  NULL,
+                                  g_signal_accumulator_first_wins,
                                   NULL,
                                   g_cclosure_marshal_generic,
                                   G_TYPE_INT,
-                                  2,
+                                  3,
+                                  G_TYPE_STRING,
                                   G_TYPE_INT,
                                   G_TYPE_POINTER);
 }
@@ -60,8 +65,7 @@ fig_command_class_init (FigCommandClass *klass)
 static void
 fig_command_init (FigCommand *command)
 {
-   command->priv =
-      G_TYPE_INSTANCE_GET_PRIVATE(command,
-                                  FIG_TYPE_COMMAND,
-                                  FigCommandPrivate);
+   command->priv = G_TYPE_INSTANCE_GET_PRIVATE (command,
+                                                FIG_TYPE_COMMAND,
+                                                FigCommandPrivate);
 }

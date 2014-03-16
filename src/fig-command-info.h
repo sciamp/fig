@@ -37,6 +37,9 @@ typedef struct _FigCommandInfo        FigCommandInfo;
 typedef struct _FigCommandInfoClass   FigCommandInfoClass;
 typedef struct _FigCommandInfoPrivate FigCommandInfoPrivate;
 
+typedef FigCommand *(*FigCommandFactory) (FigCommandInfo *info,
+                                          gpointer        user_info);
+
 struct _FigCommandInfo
 {
    GInitiallyUnowned parent;
@@ -54,11 +57,14 @@ struct _FigCommandInfoClass
 
 FigCommand     *fig_command_info_create           (FigCommandInfo *info);
 GType           fig_command_info_get_type         (void) G_GNUC_CONST;
-GType           fig_command_info_get_command_type (FigCommandInfo *info);
-const gchar    *fig_command_info_get_description  (FigCommandInfo *info);
-const gchar    *fig_command_info_get_name         (FigCommandInfo *info);
-void            fig_command_info_register         (FigCommandInfo *info);
-FigCommandInfo *fig_command_info_lookup           (const gchar    *name);
+GType           fig_command_info_get_command_type (FigCommandInfo    *info);
+const gchar    *fig_command_info_get_description  (FigCommandInfo    *info);
+const gchar    *fig_command_info_get_name         (FigCommandInfo    *info);
+void            fig_command_info_set_factory      (FigCommandInfo    *info,
+                                                   FigCommandFactory  factory,
+                                                   gpointer           user_data);
+void            fig_command_info_register         (FigCommandInfo    *info);
+FigCommandInfo *fig_command_info_lookup           (const gchar       *name);
 
 G_END_DECLS
 

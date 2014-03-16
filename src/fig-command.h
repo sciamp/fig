@@ -48,14 +48,16 @@ struct _FigCommandClass
    GObjectClass parent_class;
 
    gint (*run) (FigCommand  *command,
+                const gchar *project_dir,
                 gint         argc,
                 gchar      **argv);
 };
 
 GType fig_command_get_type (void) G_GNUC_CONST;
-gint  fig_command_run      (FigCommand  *command,
-                            gint         argc,
-                            gchar      **argv);
+gint  fig_command_run      (FigCommand   *command,
+                            const gchar  *project_dir,
+                            gint          argc,
+                            gchar       **argv);
 
 G_END_DECLS
 

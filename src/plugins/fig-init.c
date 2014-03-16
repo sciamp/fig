@@ -19,10 +19,36 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
+#include "fig-command.h"
 #include "fig-command-info.h"
 
+static gint
+run_init (FigCommand   *command,
+          const gchar  *directory,
+          gint          argc,
+          gchar       **argv,
+          gpointer      user_data)
+{
+   g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+
+   g_print ("Initializing...\n");
+
+   return -1;
+}
+
+static FigCommand *
+create_command (FigCommandInfo *command_info,
+                gpointer        user_data)
+{
+   FigCommand *command;
+
+   command = g_object_new (FIG_TYPE_COMMAND, NULL);
+   g_signal_connect (command, "run", G_CALLBACK (run_init), NULL);
+   return command;
+}
+
 void
-fig_init (void)
+fig_plugin_load (void)
 {
    FigCommandInfo *info;
 
@@ -30,5 +56,6 @@ fig_init (void)
                         "name", "init",
                         "description", N_("Initialize a new automake project."),
                         NULL);
+   fig_command_info_set_factory (info, create_command, NULL);
    fig_command_info_register (info);
 }
