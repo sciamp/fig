@@ -18,7 +18,7 @@
 
 #include <glib/gi18n.h>
 
-#include "fig-template.h"
+#include "fig.h"
 
 G_DEFINE_TYPE (FigTemplate, fig_template, G_TYPE_OBJECT)
 
@@ -118,7 +118,7 @@ fig_template_render (FigTemplate  *template,
 
       f1 = g_file_get_path (src);
       f2 = g_file_get_path (file);
-      g_print ("%s => %s\n", f1, f2);
+      g_message ("%s => %s", f1, f2);
       g_free  (f1);
       g_free  (f2);
    }

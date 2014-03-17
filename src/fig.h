@@ -23,10 +23,14 @@
 
 G_BEGIN_DECLS
 
+#undef G_LOG_DOMAIN
+#define G_LOG_DOMAIN "fig"
+
 #define FIG_INSIDE
 #include "fig-command.h"
 #include "fig-command-info.h"
 #include "fig-plugin.h"
+#include "fig-template.h"
 #undef FIG_INSIDE
 
 G_END_DECLS
