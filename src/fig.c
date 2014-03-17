@@ -138,6 +138,10 @@ main (int   argc,
       goto failure;
    }
 
+   if (!gDirectory) {
+      gDirectory = g_strdup (".");
+   }
+
    load_plugins ();
 
    command_name = argv [1];

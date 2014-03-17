@@ -21,6 +21,32 @@
 
 #include "fig-command.h"
 #include "fig-command-info.h"
+#include "fig-template.h"
+
+static void
+render_template (const gchar *name,
+                 const gchar *directory)
+{
+   FigTemplate *tmpl;
+   GError *error = NULL;
+   GFile *dst;
+   gchar *path;
+
+   tmpl = fig_template_new (name);
+   g_assert (tmpl);
+
+   path = g_build_filename (directory, name, NULL);
+   dst = g_file_new_for_path (path);
+   g_free (path);
+
+   if (!fig_template_render (tmpl, dst, &error)) {
+      g_printerr ("%s: %s\n", name, error->message);
+      g_clear_error (&error);
+   }
+
+   g_object_unref (tmpl);
+   g_object_unref (dst);
+}
 
 static gint
 run_init (FigCommand   *command,
@@ -30,6 +56,22 @@ run_init (FigCommand   *command,
           gpointer      user_data)
 {
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+
+   render_template ("autogen.sh", directory);
+   render_template ("configure.ac", directory);
+   render_template ("README", directory);
+   render_template ("NEWS", directory);
+
+   /* git init */
+   /* tmpl autogen.sh . */
+   /* tmpl README */
+   /* tmpl configure.ac */
+   /* tmpl COPYING-GPL3 */
+   /* tmpl Makefile.am */
+   /* tmpl NEWS */
+   /* tmpl build/autotools/m4 */
+   /* tmpl build/autotools/PrintConfiguration.m4 */
+   /* git commit */
 
    g_print ("Initializing...\n");
 
