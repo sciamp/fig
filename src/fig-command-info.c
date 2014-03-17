@@ -119,7 +119,12 @@ FigCommandInfo *
 fig_command_info_lookup (const gchar *name)
 {
    g_return_val_if_fail (name, NULL);
-   return g_hash_table_lookup (gCommandInfos, name);
+
+   if (gCommandInfos) {
+      return g_hash_table_lookup (gCommandInfos, name);
+   }
+
+   return NULL;
 }
 
 static void
