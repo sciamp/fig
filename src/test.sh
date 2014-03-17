@@ -5,7 +5,13 @@ if [ ! -e "fig-command-info.h" ]; then
 	exit 1
 fi
 
-rm -rf test-dir
+TEST_DIR=test-dir
 
-./fig -d test-dir init
+if [ -d "${TEST_DIR}" ]; then
+	rm -rf "${TEST_DIR}"
+fi
+
+./fig -d "${TEST_DIR}" init
+./fig -d "${TEST_DIR}" add-target --library foobar-1.0
+./fig -d "${TEST_DIR}" add-target --program baz
 
