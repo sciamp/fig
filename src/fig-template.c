@@ -72,6 +72,7 @@ fig_template_render (FigTemplate  *template,
    gboolean ret;
    GFile *src;
    gchar *path;
+   gchar *parent;
 
    g_return_val_if_fail (FIG_IS_TEMPLATE (template), FALSE);
    g_return_val_if_fail (G_IS_FILE (file), FALSE);
@@ -79,7 +80,7 @@ fig_template_render (FigTemplate  *template,
    priv = template->priv;
 
    /*
-    * Just copy the file now until we get our template stuff figured out.
+    * TODO: generate output data by processing template for @@, etc...
     */
 
    if ((str = g_getenv ("FIG_TEMPLATE_DIR"))) {
@@ -88,9 +89,39 @@ fig_template_render (FigTemplate  *template,
       }
    }
 
+   /*
+    * Create GFile for destination file.
+    */
    path = g_build_filename (dir, priv->name, NULL);
    src = g_file_new_for_path (path);
+   g_assert (src);
    g_free (path);
+
+   /*
+    * Create directory if needed.
+    */
+   if ((path = g_file_get_path (file))) {
+      if ((parent = g_path_get_dirname (path))) {
+         if (!!g_strcmp0 (".", parent)) {
+            if (!g_file_test (parent, G_FILE_TEST_IS_DIR)) {
+               g_mkdir_with_parents (parent, 0750);
+               g_print ("%s\n", parent);
+            }
+         }
+         g_free (parent);
+      }
+      g_free (path);
+   }
+
+   {
+      gchar *f1, *f2;
+
+      f1 = g_file_get_path (src);
+      f2 = g_file_get_path (file);
+      g_print ("%s => %s\n", f1, f2);
+      g_free  (f1);
+      g_free  (f2);
+   }
 
    ret = g_file_copy (src, file, G_FILE_COPY_NONE, NULL, NULL, NULL, error);
 
