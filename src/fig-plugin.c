@@ -71,7 +71,7 @@ fig_plugin_load (FigPlugin  *plugin,
    FigPluginPrivate *priv;
    void (*load) (void) = NULL;
 
-   g_return_val_if_fail (FIG_IS_PLUGIN (plugin), NULL);
+   g_return_val_if_fail (FIG_IS_PLUGIN (plugin), FALSE);
 
    priv = plugin->priv;
 
@@ -116,7 +116,7 @@ fig_plugin_unload (FigPlugin  *plugin,
    FigPluginPrivate *priv;
    gboolean ret = TRUE;
 
-   g_return_val_if_fail (FIG_IS_PLUGIN (plugin), NULL);
+   g_return_val_if_fail (FIG_IS_PLUGIN (plugin), FALSE);
 
    priv = plugin->priv;
 
