@@ -62,6 +62,10 @@ run_init (FigCommand   *command,
    render_template ("README", directory);
    render_template ("NEWS", directory);
    render_template ("build/autotools/m4/.gitignore", directory);
+   render_template ("build/autotools/Defaults.mk", directory);
+   render_template ("build/autotools/ChangeLog.mk", directory);
+   render_template ("build/autotools/AutomakeDocs.mk", directory);
+   render_template ("Makefile.am", directory);
 
    /* git init */
    /* tmpl autogen.sh . */
