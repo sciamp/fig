@@ -67,6 +67,7 @@ main (int   argc,
    FigCommandInfo *command_info;
    const gchar *command_name;
    FigCommand *command;
+   GError *error = NULL;
 
    if (!(command_name = fig_util_get_command_name (argc, argv))) {
       print_help ();
@@ -85,6 +86,25 @@ main (int   argc,
       g_printerr ("fig: '%s' command was not installed properly.\n",
                   command_name);
       return EXIT_FAILURE;
+   }
+
+   {
+      GOptionContext *context;
+      GOptionGroup *group;
+
+      context = g_option_context_new ("[--project-dir=DIR] <command> <args>");
+
+      if ((group = fig_command_get_option_group (command))) {
+         g_option_context_add_group (context, group);
+      }
+
+      if (!g_option_context_parse (context, &argc, &argv, &error)) {
+         g_printerr ("%s\n", error->message);
+         g_error_free (error);
+         return EXIT_FAILURE;
+      }
+
+      g_option_context_free (context);
    }
 
    /*

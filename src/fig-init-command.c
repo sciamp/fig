@@ -125,8 +125,10 @@ render_template (FigCommand  *command,
 }
 
 static gint
-fig_init_command_run (FigCommand   *command,
-                      GError      **error)
+fig_init_command_run (FigCommand  *command,
+                      gint         argc,
+                      gchar      **argv,
+                      GError     **error)
 {
    const gchar *license = "gpl-3.0";
    gchar *license_path;

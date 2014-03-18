@@ -36,29 +36,28 @@ enum
 
 static GParamSpec *gParamSpecs [LAST_PROP];
 
-gboolean
-fig_command_parse (FigCommand  *command,
-                   gint         argc,
-                   gchar      **argv,
-                   GError     **error)
+GOptionGroup *
+fig_command_get_option_group (FigCommand *command)
 {
-   g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+   g_return_val_if_fail (FIG_IS_COMMAND (command), NULL);
 
-   if (FIG_COMMAND_GET_CLASS (command)->parse) {
-      return FIG_COMMAND_GET_CLASS (command)->parse (command, argc, argv, error);
+   if (FIG_COMMAND_GET_CLASS (command)->get_option_group) {
+      return FIG_COMMAND_GET_CLASS (command)->get_option_group (command);
    }
 
-   return TRUE;
+   return NULL;
 }
 
 gint
 fig_command_run (FigCommand  *command,
+                 gint         argc,
+                 gchar      **argv,
                  GError     **error)
 {
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
 
    if (FIG_COMMAND_GET_CLASS (command)->run) {
-      return FIG_COMMAND_GET_CLASS (command)->run (command, error);
+      return FIG_COMMAND_GET_CLASS (command)->run (command, argc, argv, error);
    }
 
    return 0;

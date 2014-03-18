@@ -47,23 +47,21 @@ struct _FigCommandClass
 {
    GObjectClass parent_class;
 
-   gboolean (*parse) (FigCommand  *command,
-                      gint         argc,
-                      gchar      **argv,
-                      GError     **error);
-   gint     (*run)   (FigCommand  *command,
-                      GError     **error);
+   GOptionGroup *(*get_option_group) (FigCommand  *command);
+   gint          (*run)              (FigCommand  *command,
+                                      gint         argc,
+                                      gchar      **argv,
+                                      GError     **error);
 };
 
 GType         fig_command_get_type         (void) G_GNUC_CONST;
 GFile        *fig_command_get_project_dir  (FigCommand  *command);
 void          fig_command_set_project_dir  (FigCommand  *command,
                                             GFile       *directory);
-gboolean      fig_command_parse            (FigCommand  *command,
+GOptionGroup *fig_command_get_option_group (FigCommand  *command);
+gint          fig_command_run              (FigCommand  *command,
                                             gint         argc,
                                             gchar      **argv,
-                                            GError     **error);
-gint          fig_command_run              (FigCommand  *command,
                                             GError     **error);
 
 G_END_DECLS
