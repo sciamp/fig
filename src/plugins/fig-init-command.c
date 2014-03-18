@@ -31,10 +31,70 @@ struct _FigInitCommandPrivate
 enum
 {
    PROP_0,
+   PROP_NAME,
+   PROP_VERSION,
    LAST_PROP
 };
 
-//static GParamSpec *gParamSpecs[LAST_PROP];
+static GParamSpec *gParamSpecs [LAST_PROP];
+
+const gchar *
+fig_init_command_get_name (FigInitCommand *command)
+{
+   FigInitCommandPrivate *priv;
+   GFile *file;
+
+   g_return_val_if_fail (FIG_IS_INIT_COMMAND (command), NULL);
+
+   priv = command->priv;
+
+   if (!priv->name) {
+      file = fig_command_get_project_dir (FIG_COMMAND (command));
+      if (file) {
+         priv->name = g_file_get_basename (file);
+      }
+   }
+
+   return priv->name;
+}
+
+void
+fig_init_command_set_name (FigInitCommand *command,
+                           const gchar    *name)
+{
+   g_return_if_fail (FIG_IS_INIT_COMMAND (command));
+
+   g_free (command->priv->name);
+   command->priv->name = g_strdup (name);
+   g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_NAME]);
+}
+
+const gchar *
+fig_init_command_get_version (FigInitCommand *command)
+{
+   FigInitCommandPrivate *priv;
+
+   g_return_val_if_fail (FIG_IS_INIT_COMMAND (command), NULL);
+
+   priv = command->priv;
+
+   if (!priv->version) {
+      return "0.1.0";
+   }
+
+   return priv->version;
+}
+
+void
+fig_init_command_set_version (FigInitCommand *command,
+                           const gchar    *version)
+{
+   g_return_if_fail (FIG_IS_INIT_COMMAND (command));
+
+   g_free (command->priv->version);
+   command->priv->version = g_strdup (version);
+   g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_VERSION]);
+}
 
 static void
 render_template (FigCommand  *command,
@@ -104,12 +164,21 @@ fig_init_command_get_property (GObject    *object,
                                GValue     *value,
                                GParamSpec *pspec)
 {
-   //FigInitCommand *command = FIG_INIT_COMMAND (object);
+   FigInitCommand *command = FIG_INIT_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_NAME:
+      g_value_set_string (value, fig_init_command_get_name (command));
+      break;
+   case PROP_VERSION:
+      g_value_set_string (value, fig_init_command_get_version (command));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+      return;
    }
+
+   g_object_notify_by_pspec (object, pspec);
 }
 
 static void
@@ -118,9 +187,15 @@ fig_init_command_set_property (GObject      *object,
                                const GValue *value,
                                GParamSpec   *pspec)
 {
-   //FigInitCommand *command = FIG_INIT_COMMAND (object);
+   FigInitCommand *command = FIG_INIT_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_NAME:
+      fig_init_command_set_name (command, g_value_get_string (value));
+      break;
+   case PROP_VERSION:
+      fig_init_command_set_version (command, g_value_get_string (value));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
    }
@@ -140,6 +215,26 @@ fig_init_command_class_init (FigInitCommandClass *klass)
 
    command_class = FIG_COMMAND_CLASS (klass);
    command_class->run = fig_init_command_run;
+
+   gParamSpecs [PROP_NAME] =
+      g_param_spec_string ("name",
+                           _("Name"),
+                           _("The name of the project."),
+                           NULL,
+                           (G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_NAME,
+                                    gParamSpecs [PROP_NAME]);
+
+   gParamSpecs [PROP_VERSION] =
+      g_param_spec_string ("version",
+                           _("Version"),
+                           _("The starting version triplet (0.1.0)"),
+                           NULL,
+                           (G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_VERSION,
+                                    gParamSpecs [PROP_VERSION]);
 }
 
 static void
