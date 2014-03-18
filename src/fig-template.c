@@ -105,7 +105,6 @@ fig_template_render (FigTemplate  *template,
          if (!!g_strcmp0 (".", parent)) {
             if (!g_file_test (parent, G_FILE_TEST_IS_DIR)) {
                g_mkdir_with_parents (parent, 0750);
-               g_print ("%s\n", parent);
             }
          }
          g_free (parent);
