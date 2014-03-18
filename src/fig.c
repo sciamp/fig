@@ -70,9 +70,8 @@ load_plugins (void)
 
          path = g_build_filename (dirs [i], str, NULL);
          plugin = fig_plugin_new_for_path (path);
-         g_free (path);
-
          g_debug ("Loading %s", path);
+         g_free (path);
 
          if (!fig_plugin_load (plugin, &error)) {
             g_printerr ("%s\n", error->message);

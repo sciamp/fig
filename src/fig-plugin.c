@@ -93,13 +93,15 @@ fig_plugin_load (FigPlugin  *plugin,
       return FALSE;
    }
 
-   if (!g_module_symbol (priv->module, "fig_plugin_load", (gpointer *)&load)) {
+#define FIG_PLUGIN_SYMBOL "fig_plugin_init"
+
+   if (!g_module_symbol (priv->module, FIG_PLUGIN_SYMBOL, (gpointer *)&load)) {
       g_module_close (priv->module);
       priv->module = NULL;
       g_set_error (error,
                    G_IO_ERROR,
                    G_IO_ERROR_FAILED,
-                   "Failed to locate symbol fig_plugin_load: %s",
+                   "Failed to locate symbol " FIG_PLUGIN_SYMBOL ": %s",
                    priv->path);
       return FALSE;
    }

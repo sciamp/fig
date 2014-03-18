@@ -21,6 +21,8 @@
 
 #include <glib-object.h>
 
+#include "fig-command-info.h"
+
 G_BEGIN_DECLS
 
 #define FIG_TYPE_PLUGIN            (fig_plugin_get_type())
@@ -30,6 +32,19 @@ G_BEGIN_DECLS
 #define FIG_IS_PLUGIN(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FIG_TYPE_PLUGIN))
 #define FIG_IS_PLUGIN_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  FIG_TYPE_PLUGIN))
 #define FIG_PLUGIN_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  FIG_TYPE_PLUGIN, FigPluginClass))
+#define FIG_PLUGIN_REGISTER(name, desc, TYPE) \
+   void \
+   fig_plugin_init (void) \
+   { \
+      FigCommandInfo *info; \
+      \
+      info = g_object_new (FIG_TYPE_COMMAND_INFO, \
+                           "name", (const gchar *)(name), \
+                           "description", (const gchar *)(desc), \
+                           "command-type", (GType)(TYPE), \
+                           NULL); \
+      fig_command_info_register (info); \
+   }
 
 typedef struct _FigPlugin        FigPlugin;
 typedef struct _FigPluginClass   FigPluginClass;

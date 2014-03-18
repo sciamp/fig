@@ -123,6 +123,9 @@ fig_template_render (FigTemplate  *template,
       g_free  (f2);
    }
 
+   g_assert (G_IS_FILE (src));
+   g_assert (G_IS_FILE (file));
+
    ret = g_file_copy (src, file, G_FILE_COPY_NONE, NULL, NULL, NULL, error);
 
    g_object_unref (src);

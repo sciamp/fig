@@ -112,7 +112,7 @@ fig_command_info_register (FigCommandInfo *info)
    g_return_if_fail (FIG_IS_COMMAND_INFO (info));
 
    name = fig_command_info_get_name (info);
-   g_hash_table_insert (gCommandInfos, g_strdup (name), g_object_ref (info));
+   g_hash_table_insert (gCommandInfos, g_strdup (name), g_object_ref_sink (info));
 }
 
 FigCommandInfo *
