@@ -1,4 +1,5 @@
 fig
 *.swp
 *.so
+*.o
 test-dir
