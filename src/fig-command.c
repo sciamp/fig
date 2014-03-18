@@ -22,13 +22,26 @@
 
 G_DEFINE_TYPE (FigCommand, fig_command, G_TYPE_OBJECT)
 
+struct _FigCommandPrivate
+{
+   GFile *project_dir;
+};
+
 enum
 {
    RUN,
    LAST_SIGNAL
 };
 
-static guint gSignals [LAST_SIGNAL];
+enum
+{
+   PROP_0,
+   PROP_PROJECT_DIR,
+   LAST_PROP
+};
+
+static GParamSpec *gParamSpecs [LAST_PROP];
+static guint       gSignals [LAST_SIGNAL];
 
 gint
 fig_command_run (FigCommand   *command,
@@ -45,9 +58,99 @@ fig_command_run (FigCommand   *command,
    return ret;
 }
 
+GFile *
+fig_command_get_project_dir (FigCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_COMMAND (command), NULL);
+
+   return command->priv->project_dir;
+}
+
+void
+fig_command_set_project_dir (FigCommand *command,
+                             GFile      *file)
+{
+   FigCommandPrivate *priv;
+
+   g_return_if_fail (FIG_IS_COMMAND (command));
+
+   priv = command->priv;
+
+   if (file != priv->project_dir) {
+      g_clear_object (&priv->project_dir);
+      if (file) {
+         priv->project_dir = g_object_ref (file);
+      } else {
+         priv->project_dir = g_file_new_for_path (".");
+      }
+      g_object_notify_by_pspec (G_OBJECT (command),
+                                gParamSpecs [PROP_PROJECT_DIR]);
+   }
+}
+
+static void
+fig_command_finalize (GObject *object)
+{
+   FigCommandPrivate *priv = FIG_COMMAND (object)->priv;
+
+   g_clear_object (&priv->project_dir);
+
+   G_OBJECT_CLASS (fig_command_parent_class)->finalize (object);
+}
+
+static void
+fig_command_get_property (GObject    *object,
+                          guint       prop_id,
+                          GValue     *value,
+                          GParamSpec *pspec)
+{
+   FigCommand *command = FIG_COMMAND(object);
+
+   switch (prop_id) {
+   case PROP_PROJECT_DIR:
+      g_value_set_object (value, fig_command_get_project_dir (command));
+      break;
+   default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
+static void
+fig_command_set_property (GObject      *object,
+                          guint         prop_id,
+                          const GValue *value,
+                          GParamSpec   *pspec)
+{
+   FigCommand *command = FIG_COMMAND(object);
+
+   switch (prop_id) {
+   case PROP_PROJECT_DIR:
+      fig_command_set_project_dir (command, g_value_get_object (value));
+      break;
+   default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+   }
+}
+
 static void
 fig_command_class_init (FigCommandClass *klass)
 {
+   GObjectClass *object_class;
+
+   object_class = G_OBJECT_CLASS (klass);
+   object_class->finalize = fig_command_finalize;
+   object_class->get_property = fig_command_get_property;
+   object_class->set_property = fig_command_set_property;
+
+   gParamSpecs [PROP_PROJECT_DIR] =
+      g_param_spec_object ("project-dir",
+                           _("Project Dir"),
+                           _("The directory containing the project."),
+                           G_TYPE_FILE,
+                           (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property(object_class, PROP_PROJECT_DIR,
+                                   gParamSpecs[PROP_PROJECT_DIR]);
+
    gSignals [RUN] = g_signal_new ("run",
                                   FIG_TYPE_COMMAND,
                                   G_SIGNAL_RUN_LAST,
@@ -68,4 +171,6 @@ fig_command_init (FigCommand *command)
    command->priv = G_TYPE_INSTANCE_GET_PRIVATE (command,
                                                 FIG_TYPE_COMMAND,
                                                 FigCommandPrivate);
+
+   command->priv->project_dir = g_file_new_for_path (".");
 }

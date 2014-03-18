@@ -19,7 +19,7 @@
 #ifndef FIG_COMMAND_H
 #define FIG_COMMAND_H
 
-#include <glib-object.h>
+#include <gio/gio.h>
 
 G_BEGIN_DECLS
 
@@ -53,11 +53,15 @@ struct _FigCommandClass
                 gchar      **argv);
 };
 
-GType fig_command_get_type (void) G_GNUC_CONST;
-gint  fig_command_run      (FigCommand   *command,
-                            const gchar  *project_dir,
-                            gint          argc,
-                            gchar       **argv);
+GType         fig_command_get_type         (void) G_GNUC_CONST;
+GFile        *fig_command_get_project_dir  (FigCommand   *command);
+void          fig_command_set_project_dir  (FigCommand   *command,
+                                            GFile        *directory);
+GOptionGroup *fig_command_get_option_group (FigCommand   *command);
+gint          fig_command_run              (FigCommand   *command,
+                                            const gchar  *project_dir,
+                                            gint          argc,
+                                            gchar       **argv);
 
 G_END_DECLS
 
