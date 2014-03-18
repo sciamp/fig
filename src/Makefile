@@ -19,6 +19,7 @@ LIBS = $(shell pkg-config --libs $(PKGS)) \
 OBJS = \
 	fig-command.o \
 	fig-command-info.o \
+	fig-command-manager.o \
 	fig-plugin.o \
 	fig-template.o \
 	fig-util.o

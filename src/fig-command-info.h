@@ -21,50 +21,18 @@
 
 #include <glib-object.h>
 
-#include "fig-command.h"
-
 G_BEGIN_DECLS
 
-#define FIG_TYPE_COMMAND_INFO            (fig_command_info_get_type())
-#define FIG_COMMAND_INFO(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), FIG_TYPE_COMMAND_INFO, FigCommandInfo))
-#define FIG_COMMAND_INFO_CONST(obj)      (G_TYPE_CHECK_INSTANCE_CAST ((obj), FIG_TYPE_COMMAND_INFO, FigCommandInfo const))
-#define FIG_COMMAND_INFO_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  FIG_TYPE_COMMAND_INFO, FigCommandInfoClass))
-#define FIG_IS_COMMAND_INFO(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), FIG_TYPE_COMMAND_INFO))
-#define FIG_IS_COMMAND_INFO_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  FIG_TYPE_COMMAND_INFO))
-#define FIG_COMMAND_INFO_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  FIG_TYPE_COMMAND_INFO, FigCommandInfoClass))
-
-typedef struct _FigCommandInfo        FigCommandInfo;
-typedef struct _FigCommandInfoClass   FigCommandInfoClass;
-typedef struct _FigCommandInfoPrivate FigCommandInfoPrivate;
-
-typedef FigCommand *(*FigCommandFactory) (FigCommandInfo *info,
-                                          gpointer        user_info);
-
-struct _FigCommandInfo
+typedef struct
 {
-   GInitiallyUnowned parent;
+   gchar *name;
+   gchar *description;
+   GType  command_type;
+} FigCommandInfo;
 
-   /*< private >*/
-   FigCommandInfoPrivate *priv;
-};
-
-struct _FigCommandInfoClass
-{
-   GInitiallyUnownedClass parent_class;
-
-   FigCommand *(*create) (FigCommandInfo *info);
-};
-
-FigCommand     *fig_command_info_create           (FigCommandInfo *info);
-GType           fig_command_info_get_type         (void) G_GNUC_CONST;
-GType           fig_command_info_get_command_type (FigCommandInfo    *info);
-const gchar    *fig_command_info_get_description  (FigCommandInfo    *info);
-const gchar    *fig_command_info_get_name         (FigCommandInfo    *info);
-void            fig_command_info_set_factory      (FigCommandInfo    *info,
-                                                   FigCommandFactory  factory,
-                                                   gpointer           user_data);
-void            fig_command_info_register         (FigCommandInfo    *info);
-FigCommandInfo *fig_command_info_lookup           (const gchar       *name);
+GType           fig_command_info_get_type (void) G_GNUC_CONST;
+FigCommandInfo *fig_command_info_copy     (const FigCommandInfo *command_info);
+void            fig_command_info_free     (FigCommandInfo       *command_info);
 
 G_END_DECLS
 
