@@ -47,6 +47,8 @@ struct _FigCommandClass
 {
    GObjectClass parent_class;
 
+   GOptionGroup *(*get_option_group) (FigCommand *command);
+
    gint (*run) (FigCommand  *command,
                 const gchar *project_dir,
                 gint         argc,

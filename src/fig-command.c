@@ -88,6 +88,18 @@ fig_command_set_project_dir (FigCommand *command,
    }
 }
 
+GOptionGroup *
+fig_command_get_option_group (FigCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_COMMAND (command), NULL);
+
+   if (FIG_COMMAND_GET_CLASS (command)->get_option_group) {
+      return FIG_COMMAND_GET_CLASS (command)->get_option_group (command);
+   }
+
+   return NULL;
+}
+
 static void
 fig_command_finalize (GObject *object)
 {
