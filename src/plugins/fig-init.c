@@ -25,7 +25,8 @@
 
 static void
 render_template (const gchar *name,
-                 const gchar *directory)
+                 const gchar *directory,
+                 const gchar *target_name)
 {
    FigTemplate *tmpl;
    GError *error = NULL;
@@ -35,7 +36,7 @@ render_template (const gchar *name,
    tmpl = fig_template_new (name);
    g_assert (tmpl);
 
-   path = g_build_filename (directory, name, NULL);
+   path = g_build_filename (directory, target_name ? target_name : name, NULL);
    dst = g_file_new_for_path (path);
    g_free (path);
 
@@ -55,18 +56,28 @@ run_init (FigCommand   *command,
           gchar       **argv,
           gpointer      user_data)
 {
+   const gchar *license = "gpl-3.0";
+   gchar *license_path;
+
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
 
-   render_template ("AUTHORS", directory);
-   render_template ("Makefile.am", directory);
-   render_template ("NEWS", directory);
-   render_template ("README", directory);
-   render_template ("autogen.sh", directory);
-   render_template ("build/autotools/AutomakeDocs.mk", directory);
-   render_template ("build/autotools/ChangeLog.mk", directory);
-   render_template ("build/autotools/Defaults.mk", directory);
-   render_template ("build/autotools/m4/.gitignore", directory);
-   render_template ("configure.ac", directory);
+   /*
+    * TODO: Parse command options.
+    */
+
+   license_path = g_strdup_printf ("licenses/%s.txt", license);
+
+   render_template ("AUTHORS", directory, NULL);
+   render_template ("Makefile.am", directory, NULL);
+   render_template ("NEWS", directory, NULL);
+   render_template ("README", directory, NULL);
+   render_template ("autogen.sh", directory, NULL);
+   render_template ("build/autotools/AutomakeDocs.mk", directory, NULL);
+   render_template ("build/autotools/ChangeLog.mk", directory, NULL);
+   render_template ("build/autotools/Defaults.mk", directory, NULL);
+   render_template ("build/autotools/m4/.gitignore", directory, NULL);
+   render_template ("configure.ac", directory, NULL);
+   render_template (license_path, directory, "COPYING");
 
    /* git init */
    /* tmpl autogen.sh . */
