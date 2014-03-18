@@ -57,15 +57,16 @@ run_init (FigCommand   *command,
 {
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
 
-   render_template ("autogen.sh", directory);
-   render_template ("configure.ac", directory);
-   render_template ("README", directory);
-   render_template ("NEWS", directory);
-   render_template ("build/autotools/m4/.gitignore", directory);
-   render_template ("build/autotools/Defaults.mk", directory);
-   render_template ("build/autotools/ChangeLog.mk", directory);
-   render_template ("build/autotools/AutomakeDocs.mk", directory);
+   render_template ("AUTHORS", directory);
    render_template ("Makefile.am", directory);
+   render_template ("NEWS", directory);
+   render_template ("README", directory);
+   render_template ("autogen.sh", directory);
+   render_template ("build/autotools/AutomakeDocs.mk", directory);
+   render_template ("build/autotools/ChangeLog.mk", directory);
+   render_template ("build/autotools/Defaults.mk", directory);
+   render_template ("build/autotools/m4/.gitignore", directory);
+   render_template ("configure.ac", directory);
 
    /* git init */
    /* tmpl autogen.sh . */
