@@ -119,16 +119,19 @@ main (int   argc,
    const gchar *command_name;
    FigCommand *command;
    GError *error = NULL;
+   GFile *dir;
    gchar *str;
+   int i;
    int ret = EXIT_FAILURE;
 
    context = g_option_context_new ("- Scrappy autotools manager");
    g_option_context_add_main_entries (context, gEntries, NULL);
+   g_option_context_set_help_enabled (context, FALSE);
    g_option_context_set_ignore_unknown_options (context, TRUE);
 
    if (!g_option_context_parse (context, &argc, &argv, &error)) {
       g_printerr ("%s\n", error->message);
-      g_error_free (error);
+      g_clear_error (&error);
       goto failure;
    }
 
@@ -148,6 +151,16 @@ main (int   argc,
    command_name = argv [1];
 
    if (!(info = fig_command_info_lookup (command_name))) {
+      for (i = 0; i < argc; i++) {
+         if (0 == g_strcmp0 (argv [i], "--help")) {
+            str = g_option_context_get_help (context, TRUE, NULL);
+            g_printerr ("%s", str);
+            g_free (str);
+            ret = EXIT_SUCCESS;
+            goto failure;
+         }
+      }
+
       g_printerr ("fig: '%s' is not a command. See 'fig --help'.\n\n",
                   command_name);
    } else {
@@ -155,8 +168,23 @@ main (int   argc,
          g_printerr ("fig: There is a problem with your installation of the "
                      "'%s' command.\n", command_name);
       } else {
-         ret = fig_command_run (command, gDirectory, argc, argv);
-         g_object_unref (command);
+         dir = g_file_new_for_path (gDirectory);
+         g_assert (G_IS_FILE (dir));
+         fig_command_set_project_dir (command, dir);
+         g_clear_object (&dir);
+
+         if (!fig_command_parse (command, argc, argv, &error)) {
+            g_printerr ("%s\n", error->message);
+            g_clear_error (&error);
+            g_clear_object (&command);
+            goto failure;
+         }
+         ret = fig_command_run (command, &error);
+         if (ret != 0 && error) {
+            g_printerr ("%s\n", error->message);
+            g_clear_error (&error);
+         }
+         g_clear_object (&command);
       }
    }
 

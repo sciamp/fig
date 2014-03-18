@@ -48,20 +48,21 @@ static FigCommand *
 fig_command_info_real_create (FigCommandInfo *info)
 {
    FigCommandInfoPrivate *priv;
+   FigCommand *ret = NULL;
 
    g_return_val_if_fail (FIG_IS_COMMAND_INFO (info), NULL);
 
    priv = info->priv;
 
    if (priv->factory) {
-      return priv->factory (info, priv->factory_data);
+      ret = priv->factory (info, priv->factory_data);
    }
 
-   if (g_type_is_a (info->priv->command_type, FIG_TYPE_COMMAND)) {
-      return g_object_new (info->priv->command_type, NULL);
+   if (!ret && g_type_is_a (info->priv->command_type, FIG_TYPE_COMMAND)) {
+      ret = g_object_new (info->priv->command_type, NULL);
    }
 
-   return NULL;
+   return ret;
 }
 
 FigCommand *

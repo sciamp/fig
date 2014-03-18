@@ -29,33 +29,39 @@ struct _FigCommandPrivate
 
 enum
 {
-   RUN,
-   LAST_SIGNAL
-};
-
-enum
-{
    PROP_0,
    PROP_PROJECT_DIR,
    LAST_PROP
 };
 
 static GParamSpec *gParamSpecs [LAST_PROP];
-static guint       gSignals [LAST_SIGNAL];
+
+gboolean
+fig_command_parse (FigCommand  *command,
+                   gint         argc,
+                   gchar      **argv,
+                   GError     **error)
+{
+   g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+
+   if (FIG_COMMAND_GET_CLASS (command)->parse) {
+      return FIG_COMMAND_GET_CLASS (command)->parse (command, argc, argv, error);
+   }
+
+   return TRUE;
+}
 
 gint
-fig_command_run (FigCommand   *command,
-                 const gchar  *project_dir,
-                 gint          argc,
-                 gchar       **argv)
+fig_command_run (FigCommand  *command,
+                 GError     **error)
 {
-   gint ret = -1;
+   g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
 
-   g_return_val_if_fail (FIG_IS_COMMAND(command), -1);
+   if (FIG_COMMAND_GET_CLASS (command)->run) {
+      return FIG_COMMAND_GET_CLASS (command)->run (command, error);
+   }
 
-   g_signal_emit (command, gSignals [RUN], 0, project_dir, argc, argv, &ret);
-
-   return ret;
+   return 0;
 }
 
 GFile *
@@ -68,36 +74,25 @@ fig_command_get_project_dir (FigCommand *command)
 
 void
 fig_command_set_project_dir (FigCommand *command,
-                             GFile      *file)
+                             GFile      *project_dir)
 {
    FigCommandPrivate *priv;
+   GFile *tmp;
 
    g_return_if_fail (FIG_IS_COMMAND (command));
+   g_return_if_fail (G_IS_OBJECT (command));
+   g_return_if_fail (!project_dir || G_IS_FILE (project_dir));
 
    priv = command->priv;
 
-   if (file != priv->project_dir) {
-      g_clear_object (&priv->project_dir);
-      if (file) {
-         priv->project_dir = g_object_ref (file);
-      } else {
-         priv->project_dir = g_file_new_for_path (".");
-      }
-      g_object_notify_by_pspec (G_OBJECT (command),
-                                gParamSpecs [PROP_PROJECT_DIR]);
+   tmp = priv->project_dir;
+   priv->project_dir = project_dir ? g_object_ref (project_dir) : NULL;
+   if (!priv->project_dir) {
+      priv->project_dir = g_file_new_for_path (".");
    }
-}
-
-GOptionGroup *
-fig_command_get_option_group (FigCommand *command)
-{
-   g_return_val_if_fail (FIG_IS_COMMAND (command), NULL);
-
-   if (FIG_COMMAND_GET_CLASS (command)->get_option_group) {
-      return FIG_COMMAND_GET_CLASS (command)->get_option_group (command);
-   }
-
-   return NULL;
+   g_object_notify_by_pspec (G_OBJECT (command),
+                             gParamSpecs [PROP_PROJECT_DIR]);
+   g_clear_object (&tmp);
 }
 
 static void
@@ -153,6 +148,7 @@ fig_command_class_init (FigCommandClass *klass)
    object_class->finalize = fig_command_finalize;
    object_class->get_property = fig_command_get_property;
    object_class->set_property = fig_command_set_property;
+   g_type_class_add_private (object_class, sizeof (FigCommandPrivate));
 
    gParamSpecs [PROP_PROJECT_DIR] =
       g_param_spec_object ("project-dir",
@@ -160,21 +156,8 @@ fig_command_class_init (FigCommandClass *klass)
                            _("The directory containing the project."),
                            G_TYPE_FILE,
                            (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-   g_object_class_install_property(object_class, PROP_PROJECT_DIR,
-                                   gParamSpecs[PROP_PROJECT_DIR]);
-
-   gSignals [RUN] = g_signal_new ("run",
-                                  FIG_TYPE_COMMAND,
-                                  G_SIGNAL_RUN_LAST,
-                                  G_STRUCT_OFFSET (FigCommandClass, run),
-                                  g_signal_accumulator_first_wins,
-                                  NULL,
-                                  g_cclosure_marshal_generic,
-                                  G_TYPE_INT,
-                                  3,
-                                  G_TYPE_STRING,
-                                  G_TYPE_INT,
-                                  G_TYPE_POINTER);
+   g_object_class_install_property (object_class, PROP_PROJECT_DIR,
+                                    gParamSpecs [PROP_PROJECT_DIR]);
 }
 
 static void
@@ -183,6 +166,5 @@ fig_command_init (FigCommand *command)
    command->priv = G_TYPE_INSTANCE_GET_PRIVATE (command,
                                                 FIG_TYPE_COMMAND,
                                                 FigCommandPrivate);
-
    command->priv->project_dir = g_file_new_for_path (".");
 }
