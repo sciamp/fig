@@ -23,16 +23,6 @@
 #include "fig.h"
 #include "fig-util.h"
 
-
-#if 0
-static gchar *gDirectory;
-static GOptionEntry gEntries [] = {
-   { "directory", 'd', 0, G_OPTION_ARG_FILENAME, &gDirectory,
-     "Root directory of the project.", "DIR" },
-   { NULL }
-};
-#endif
-
 static void
 print_help (void)
 {
@@ -45,8 +35,7 @@ print_help (void)
 
    g_printerr ("Usage:\n"
                "  fig [--project-dir=DIR] <command> <args> - "
-               "manage automake projects\n"
-               "\n"
+               "manage autotools projects\n"
                "\n"
                "Options:\n"
                "  --project-dir=DIR    Specify the project directory.\n"
@@ -60,7 +49,11 @@ print_help (void)
       g_printerr ("  %-20s %s\n", info->name, info->description);
    }
 
-   g_printerr ("\n");
+   g_printerr ("\n"
+               "Examples:\n"
+               "  # initialize a new project in ~/foo\n"
+               "  fig --project-dir=~/foo init\n"
+               "\n");
 
    g_list_foreach (list, (GFunc)fig_command_info_free, NULL);
    g_list_free (list);
@@ -93,6 +86,12 @@ main (int   argc,
                   command_name);
       return EXIT_FAILURE;
    }
+
+   /*
+    * TODO: remove command name from argv.
+    *       get option group from command.
+    *       parse whole thing with one option context.
+    */
 
    g_clear_object (&command);
    fig_command_info_free (command_info);
