@@ -124,6 +124,8 @@ main (int   argc,
 
    context = g_option_context_new ("- Scrappy autotools manager");
    g_option_context_add_main_entries (context, gEntries, NULL);
+   g_option_context_set_ignore_unknown_options (context, TRUE);
+
    if (!g_option_context_parse (context, &argc, &argv, &error)) {
       g_printerr ("%s\n", error->message);
       g_error_free (error);

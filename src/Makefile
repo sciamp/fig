@@ -14,4 +14,4 @@ plugins/fig-init-command.so: plugins/fig-init-command.c plugins/fig-init-command
 	$(CC) -fPIC -g -shared -o $@ -Wall plugins/fig-init-command.c $(shell pkg-config --cflags --libs $(PKGS)) -DFIG_PLUGINS_DIR="\"plugins\"" -I.
 
 clean:
-	rm -f fig plugins/fig-init.so
+	rm -f fig plugins/fig-init-command.so
