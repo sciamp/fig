@@ -23,7 +23,7 @@
 #include "fig.h"
 #include "fig-util.h"
 
-static GList *gPlugins;
+
 #if 0
 static gchar *gDirectory;
 static GOptionEntry gEntries [] = {
@@ -34,100 +34,69 @@ static GOptionEntry gEntries [] = {
 #endif
 
 static void
-load_plugins (void)
+print_help (void)
 {
-   const gchar *plugins_dir = FIG_PLUGINS_DIR;
-   const gchar *str;
-   FigPlugin *plugin;
-   GError *error = NULL;
-   gchar **dirs;
-   gchar *path;
-   GDir *dir;
-   gint i;
+   FigCommandManager *commands;
+   FigCommandInfo *info;
+   GList *list, *iter;
 
-   g_debug ("Loading plugins.");
+   commands = fig_command_manager_get_default ();
+   list = fig_command_manager_get_commands (commands);
 
-   if ((str = g_getenv ("FIG_PLUGINS_DIR"))) {
-      if (g_file_test (str, G_FILE_TEST_IS_DIR)) {
-         plugins_dir = str;
-      }
+   g_printerr ("Usage:\n"
+               "  fig [--project-dir=DIR] <command> <args> - "
+               "manage automake projects\n"
+               "\n"
+               "\n"
+               "Options:\n"
+               "  --project-dir=DIR    Specify the project directory.\n"
+               "                       Defaults to current directory.\n"
+               "\n"
+               "Commands:\n");
+
+   for (iter = list; iter; iter = iter->next) {
+      info = iter->data;
+
+      g_printerr ("  %-20s %s\n", info->name, info->description);
    }
 
-   dirs = g_strsplit (plugins_dir, ":", 0);
+   g_printerr ("\n");
 
-   for (i = 0; dirs [i]; i++) {
-      if (!g_file_test (dirs [i], G_FILE_TEST_IS_DIR)) {
-         continue;
-      }
-
-      if (!(dir = g_dir_open (dirs [i], 0, &error))) {
-         g_printerr ("%s\n", error->message);
-         g_clear_error (&error);
-         continue;
-      }
-
-      while ((str = g_dir_read_name (dir))) {
-         if (!g_str_has_suffix (str, "."G_MODULE_SUFFIX)) {
-            continue;
-         }
-
-         path = g_build_filename (dirs [i], str, NULL);
-         plugin = fig_plugin_new_for_path (path);
-         g_debug ("Loading %s", path);
-         g_free (path);
-
-         if (!fig_plugin_load (plugin, &error)) {
-            g_printerr ("%s\n", error->message);
-            g_clear_error (&error);
-            g_object_unref (plugin);
-            continue;
-         }
-
-         gPlugins = g_list_prepend (gPlugins, plugin);
-      }
-
-      g_dir_close (dir);
-   }
-
-   g_strfreev (dirs);
-}
-
-static void
-unload_plugins (void)
-{
-   GError *error = NULL;
-   GList *iter;
-
-   g_debug ("Unloading plugins.");
-
-   for (iter = gPlugins; iter; iter = iter->next) {
-      if (!fig_plugin_unload (iter->data, &error)) {
-         g_printerr ("%s\n", error->message);
-      }
-   }
-
-   iter = gPlugins;
-   gPlugins = NULL;
-
-   g_list_foreach (iter, (GFunc)g_object_unref, NULL);
-   g_list_free (iter);
+   g_list_foreach (list, (GFunc)fig_command_info_free, NULL);
+   g_list_free (list);
 }
 
 int
 main (int   argc,
       char *argv[])
 {
-   const gchar *command;
+   FigCommandManager *commands;
+   FigCommandInfo *command_info;
+   const gchar *command_name;
+   FigCommand *command;
 
-   load_plugins ();
-
-   if (!(command = fig_util_get_command_name (argc, argv))) {
-      g_printerr ("show help\n");
-   } else {
-      g_print ("Run command %s\n", command);
+   if (!(command_name = fig_util_get_command_name (argc, argv))) {
+      print_help ();
+      return EXIT_FAILURE;
    }
 
-   unload_plugins ();
+   commands = fig_command_manager_get_default ();
+
+   if (!(command_info = fig_command_manager_lookup (commands, command_name))) {
+      g_printerr ("fig: '%s' is not a fig command. See 'fig --help'.\n",
+                  command_name);
+      return EXIT_FAILURE;
+   }
+
+   if (!(command = g_object_new (command_info->command_type, NULL))) {
+      g_printerr ("fig: '%s' command was not installed properly.\n",
+                  command_name);
+      return EXIT_FAILURE;
+   }
+
+   g_clear_object (&command);
+   fig_command_info_free (command_info);
+   g_clear_object (&commands);
 
    return EXIT_SUCCESS;
 }

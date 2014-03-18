@@ -244,5 +244,3 @@ fig_init_command_init (FigInitCommand *command)
                                                 FIG_TYPE_INIT_COMMAND,
                                                 FigInitCommandPrivate);
 }
-
-FIG_PLUGIN_REGISTER ("init", "Initialize a new project.", FIG_TYPE_INIT_COMMAND)

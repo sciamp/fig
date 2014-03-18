@@ -1,5 +1,6 @@
-all: fig plugins/fig-init-command.so tests
+all: fig tests
 
+MV := mv
 PKGS = gio-2.0 gmodule-2.0
 
 TMPL_DIR := $(shell pwd)/templates
@@ -20,24 +21,21 @@ OBJS = \
 	fig-command.o \
 	fig-command-info.o \
 	fig-command-manager.o \
-	fig-plugin.o \
+	fig-init-command.o \
 	fig-template.o \
 	fig-util.o
 
 %.o: %.c %.h fig.h
-	$(CC) $(DEBUG) $(OPTS) $(CFLAGS) -o $@ -c $*.c
+	$(CC) $(DEBUG) $(OPTS) $(CFLAGS) -o $@.tmp -c $*.c
+	$(MV) $@.tmp $@
 
-fig: fig.c libfig.so
-	$(CC) $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS) -o $@ fig.c $(OBJS)
-
-libfig.so: $(OBJS)
-	$(CC) -shared $(DEBUG) $(OPTS) $(LIBS) $(OBJS) -o $@
-
-plugins/fig-init-command.so: libfig.so plugins/fig-init-command.c plugins/fig-init-command.h
-	$(CC) $(DEBUG) $(CFLAGS) $(LIBS) -shared -o $@ plugins/fig-init-command.c
+fig: fig.c $(OBJS)
+	$(CC) $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS) -o $@.tmp fig.c $(OBJS)
+	$(MV) $@.tmp $@
 
 tests: $(OBJS) tests.c
-	$(CC) -o $@ $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS) $(OBJS) tests.c
+	$(CC) -o $@.tmp $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS) $(OBJS) tests.c
+	$(MV) $@.tmp $@
 
 clean:
-	rm -f fig plugins/fig-init-command.so *.o libfig.so tests
+	rm -f fig $(OBJS) tests *.tmp

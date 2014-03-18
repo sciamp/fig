@@ -19,6 +19,7 @@
 #include <glib/gi18n.h>
 
 #include "fig-command-manager.h"
+#include "fig-init-command.h"
 
 G_DEFINE_TYPE (FigCommandManager, fig_command_manager, G_TYPE_OBJECT)
 
@@ -130,12 +131,25 @@ fig_command_manager_class_init (FigCommandManagerClass *klass)
 static void
 fig_command_manager_init (FigCommandManager *manager)
 {
+   FigCommandInfo builtins[] = {
+      { "init", "Initialize a new project.", FIG_TYPE_INIT_COMMAND },
+   };
+   int i;
+
    manager->priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
                                                 FIG_TYPE_COMMAND_MANAGER,
                                                 FigCommandManagerPrivate);
+
    manager->priv->command_infos =
       g_hash_table_new_full (g_str_hash,
                              g_str_equal,
                              NULL,
                              (GDestroyNotify)fig_command_info_free);
+
+   /*
+    * Register built in functions.
+    */
+   for (i = 0; i < G_N_ELEMENTS (builtins); i++) {
+      fig_command_manager_register (manager, &builtins [i]);
+   }
 }
