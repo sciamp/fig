@@ -1,4 +1,4 @@
-all: fig plugins/fig-init-command.so
+all: fig plugins/fig-init-command.so tests
 
 PKGS = gio-2.0 gmodule-2.0
 
@@ -20,7 +20,8 @@ OBJS = \
 	fig-command.o \
 	fig-command-info.o \
 	fig-plugin.o \
-	fig-template.o
+	fig-template.o \
+	fig-util.o
 
 %.o: %.c %.h fig.h
 	$(CC) $(DEBUG) $(OPTS) $(CFLAGS) -o $@ -c $*.c
@@ -34,5 +35,8 @@ libfig.so: $(OBJS)
 plugins/fig-init-command.so: libfig.so plugins/fig-init-command.c plugins/fig-init-command.h
 	$(CC) $(DEBUG) $(CFLAGS) $(LIBS) -shared -o $@ plugins/fig-init-command.c
 
+tests: $(OBJS) tests.c
+	$(CC) -o $@ $(DEBUG) $(OPTS) $(CFLAGS) $(LIBS) $(OBJS) tests.c
+
 clean:
-	rm -f fig plugins/fig-init-command.so *.o libfig.so
+	rm -f fig plugins/fig-init-command.so *.o libfig.so tests

@@ -3,3 +3,4 @@ fig
 *.so
 *.o
 test-dir
+tests

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 
 #include "fig.h"
+#include "fig-util.h"
 
 static gchar *gDirectory;
 static GList *gPlugins;
