@@ -23,13 +23,15 @@
 #include "fig.h"
 #include "fig-util.h"
 
-static gchar *gDirectory;
 static GList *gPlugins;
+#if 0
+static gchar *gDirectory;
 static GOptionEntry gEntries [] = {
    { "directory", 'd', 0, G_OPTION_ARG_FILENAME, &gDirectory,
      "Root directory of the project.", "DIR" },
    { NULL }
 };
+#endif
 
 static void
 load_plugins (void)
@@ -115,6 +117,26 @@ int
 main (int   argc,
       char *argv[])
 {
+   const gchar *command;
+
+   load_plugins ();
+
+   if (!(command = fig_util_get_command_name (argc, argv))) {
+      g_printerr ("show help\n");
+   } else {
+      g_print ("Run command %s\n", command);
+   }
+
+   unload_plugins ();
+
+   return EXIT_SUCCESS;
+}
+
+#if 0
+int
+main (int   argc,
+      char *argv[])
+{
    GOptionContext *context;
    FigCommandInfo *info;
    const gchar *command_name;
@@ -196,3 +218,4 @@ failure:
 
    return ret;
 }
+#endif
