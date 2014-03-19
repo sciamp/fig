@@ -20,8 +20,6 @@
 
 #include "fig-init-command.h"
 
-G_DEFINE_TYPE (FigInitCommand, fig_init_command, FIG_TYPE_COMMAND)
-
 struct _FigInitCommandPrivate
 {
    gchar *name;
@@ -35,6 +33,10 @@ enum
    PROP_VERSION,
    LAST_PROP
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (FigInitCommand,
+                            fig_init_command,
+                            FIG_TYPE_COMMAND)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
 
@@ -127,8 +129,7 @@ render_template (FigCommand  *command,
 static gint
 fig_init_command_run (FigCommand  *command,
                       gint         argc,
-                      gchar      **argv,
-                      GError     **error)
+                      gchar      **argv)
 {
    const gchar *license = "gpl-3.0";
    gchar *license_path;
@@ -213,7 +214,6 @@ fig_init_command_class_init (FigInitCommandClass *klass)
    object_class->finalize = fig_init_command_finalize;
    object_class->get_property = fig_init_command_get_property;
    object_class->set_property = fig_init_command_set_property;
-   g_type_class_add_private (object_class, sizeof (FigInitCommandPrivate));
 
    command_class = FIG_COMMAND_CLASS (klass);
    command_class->run = fig_init_command_run;
@@ -242,7 +242,5 @@ fig_init_command_class_init (FigInitCommandClass *klass)
 static void
 fig_init_command_init (FigInitCommand *command)
 {
-   command->priv = G_TYPE_INSTANCE_GET_PRIVATE (command,
-                                                FIG_TYPE_INIT_COMMAND,
-                                                FigInitCommandPrivate);
+   command->priv = fig_init_command_get_instance_private (command);
 }
