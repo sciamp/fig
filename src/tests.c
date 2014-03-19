@@ -4,34 +4,34 @@
 static void
 test_fig_util_get_command_name (void)
 {
-   const gchar *args1[] = { "dummy", "--some", "--value", "--help", "blah" };
-   const gchar *args2[] = { "dummy", "--some", "init", "--help" };
-   const gchar *args3[] = { "dummy", "--some=", "init", "--help" };
-   const gchar *args4[] = { "dummy", "--some=abc", "init", "--help" };
-   const gchar *args5[] = { "dummy", "--project-dir", "init", "--help" };
-   const gchar *args6[] = { "dummy", "--project-dir=", "init", "--help" };
-   const gchar *args7[] = { "dummy", "--project-dir=abc", "init", "--help" };
+   const gchar *args1[] = { "dummy", "--some", "--value", "--help", "blah", NULL };
+   const gchar *args2[] = { "dummy", "--some", "init", "--help", NULL };
+   const gchar *args3[] = { "dummy", "--some=", "init", "--help", NULL };
+   const gchar *args4[] = { "dummy", "--some=abc", "init", "--help", NULL };
+   const gchar *args5[] = { "dummy", "--project-dir", "init", "--help", NULL };
+   const gchar *args6[] = { "dummy", "--project-dir=", "init", "--help", NULL };
+   const gchar *args7[] = { "dummy", "--project-dir=abc", "init", "--help", NULL };
    const gchar *ret;
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args1), (gchar **)args1);
+   ret = fig_util_get_command_name ((gchar **)args1);
    g_assert (!ret);
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args2), (gchar **)args2);
+   ret = fig_util_get_command_name ((gchar **)args2);
    g_assert_cmpstr (ret, ==, "init");
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args3), (gchar **)args3);
+   ret = fig_util_get_command_name ((gchar **)args3);
    g_assert_cmpstr (ret, ==, "init");
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args4), (gchar **)args4);
+   ret = fig_util_get_command_name ((gchar **)args4);
    g_assert_cmpstr (ret, ==, "init");
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args5), (gchar **)args5);
+   ret = fig_util_get_command_name ((gchar **)args5);
    g_assert (!ret);
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args6), (gchar **)args6);
+   ret = fig_util_get_command_name ((gchar **)args6);
    g_assert_cmpstr (ret, ==, "init");
 
-   ret = fig_util_get_command_name (G_N_ELEMENTS (args7), (gchar **)args7);
+   ret = fig_util_get_command_name ((gchar **)args7);
    g_assert_cmpstr (ret, ==, "init");
 }
 

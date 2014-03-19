@@ -23,8 +23,7 @@
 
 G_BEGIN_DECLS
 
-const gchar *fig_util_get_command_name (gint    argc,
-                                        gchar **argv);
+const gchar *fig_util_get_command_name (gchar **argv);
 
 G_END_DECLS
 

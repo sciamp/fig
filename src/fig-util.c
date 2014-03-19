@@ -21,12 +21,10 @@
 #include "fig-util.h"
 
 const gchar *
-fig_util_get_command_name (gint    argc,
-                           gchar **argv)
+fig_util_get_command_name (gchar **argv)
 {
    gint i;
 
-   g_return_val_if_fail (argc, NULL);
    g_return_val_if_fail (argv, NULL);
 
    /*
@@ -34,7 +32,7 @@ fig_util_get_command_name (gint    argc,
     * to the `fig' command line program.
     */
 
-   for (i = 1; i < argc; i++) {
+   for (i = 1; argv [i]; i++) {
       if (g_str_equal (argv [i], "--help")) {
          return NULL;
       } else if (0 == strncmp (argv [i], "--", 2)) {
