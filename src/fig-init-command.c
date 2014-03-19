@@ -17,6 +17,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <stdlib.h>
 
 #include "fig-init-command.h"
 
@@ -126,6 +127,42 @@ render_template (FigCommand  *command,
    g_object_unref (dst);
 }
 
+static gboolean
+fig_init_command_parse (FigInitCommand  *command,
+                        gint             argc,
+                        gchar          **argv)
+{
+   GOptionContext *context;
+   GOptionEntry entries[] = {
+      { NULL }
+   };
+   gboolean ret = FALSE;
+   GError *error = NULL;
+   gchar **argv_copy;
+
+   g_set_prgname ("fig init");
+
+   argv_copy = g_strdupv (argv);
+   context = g_option_context_new (NULL);
+   g_option_context_add_main_entries (context, entries, NULL);
+   g_option_context_set_summary (
+         context,
+         _("Initialize a new autotools project."));
+
+   if (!g_option_context_parse (context, &argc, &argv_copy, &error)) {
+      goto cleanup;
+   }
+
+   ret = TRUE;
+
+cleanup:
+   g_option_context_free (context);
+   g_strfreev (argv_copy);
+   g_clear_error (&error);
+
+   return ret;
+}
+
 static gint
 fig_init_command_run (FigCommand  *command,
                       gint         argc,
@@ -135,6 +172,10 @@ fig_init_command_run (FigCommand  *command,
    gchar *license_path;
 
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+
+   if (!fig_init_command_parse (FIG_INIT_COMMAND (command), argc, argv)) {
+      return EXIT_FAILURE;
+   }
 
    license_path = g_strdup_printf ("licenses/%s.txt", license);
 

@@ -25,6 +25,8 @@ main (gint   argc,
    FigCli *cli;
    gint ret;
 
+   g_set_prgname ("fig");
+
    cli = fig_cli_new ();
    ret = fig_cli_run (cli, argc, argv);
    g_object_unref (cli);
