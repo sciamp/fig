@@ -33,15 +33,16 @@ print_help (void)
    commands = fig_command_manager_get_default ();
    list = fig_command_manager_get_commands (commands);
 
-   g_printerr ("Usage:\n"
-               "  fig [--project-dir=DIR] <command> <args> - "
-               "manage autotools projects\n"
-               "\n"
-               "Options:\n"
-               "  --project-dir=DIR    Specify the project directory.\n"
-               "                       Defaults to current directory.\n"
-               "\n"
-               "Commands:\n");
+   g_printerr (_("Usage:\n"
+                 "  fig [OPTION...] <command> <args>\n"
+                 "\n"
+                 "Fig is a tool to help you manage autotools projects.\n"
+                 "\n"
+                 "Options:\n"
+                 "  --project-dir=DIR    Specify the project directory.\n"
+                 "                       Defaults to current directory.\n"
+                 "\n"
+                 "Commands:\n"));
 
    for (iter = list; iter; iter = iter->next) {
       info = iter->data;
@@ -92,7 +93,10 @@ main (int   argc,
       GOptionContext *context;
       GOptionGroup *group;
 
-      context = g_option_context_new ("[--project-dir=DIR] <command> <args>");
+      context = g_option_context_new ("<command> <args>");
+      g_option_context_set_summary (
+         context,
+         _("Fig is a tool to help you manage autotools projects."));
 
       if ((group = fig_command_get_option_group (command))) {
          g_option_context_add_group (context, group);
