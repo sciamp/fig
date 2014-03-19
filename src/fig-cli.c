@@ -17,6 +17,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <stdlib.h>
 
 #include "fig-cli.h"
 
@@ -37,6 +38,12 @@ enum
 G_DEFINE_TYPE_WITH_PRIVATE (FigCli, fig_cli, G_TYPE_OBJECT)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
+
+FigCli *
+fig_cli_new (void)
+{
+   return g_object_new (FIG_TYPE_CLI, NULL);
+}
 
 GOutputStream *
 fig_cli_get_stderr_stream (FigCli *cli)
@@ -94,6 +101,16 @@ fig_cli_set_stdout_stream (FigCli        *cli,
       g_object_notify_by_pspec (G_OBJECT (cli),
                                 gParamSpecs [PROP_STDOUT_STREAM]);
    }
+}
+
+gint
+fig_cli_run (FigCli  *cli,
+             gint     argc,
+             gchar  **argv)
+{
+   g_return_val_if_fail (FIG_IS_CLI (cli), -1);
+
+   return EXIT_SUCCESS;
 }
 
 static void

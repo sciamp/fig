@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 #define G_LOG_DOMAIN "fig"
 
 #define FIG_INSIDE
+#include "fig-cli.h"
 #include "fig-command.h"
 #include "fig-command-info.h"
 #include "fig-command-manager.h"
