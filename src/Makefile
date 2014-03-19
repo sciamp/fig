@@ -18,6 +18,7 @@ CFLAGS = \
 LIBS = $(shell pkg-config --libs $(PKGS)) \
 
 OBJS = \
+	fig-cli.o \
 	fig-command.o \
 	fig-command-info.o \
 	fig-command-manager.o \
