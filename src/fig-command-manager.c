@@ -107,6 +107,21 @@ fig_command_manager_register (FigCommandManager    *manager,
 }
 
 static void
+fig_command_manager_register_builtins (FigCommandManager *manager)
+{
+   const FigCommandInfo builtins [] = {
+      { "init", "Initialize a new project.", FIG_TYPE_INIT_COMMAND },
+   };
+   int i;
+
+   g_assert (FIG_IS_COMMAND_MANAGER (manager));
+
+   for (i = 0; i < G_N_ELEMENTS (builtins); i++) {
+      fig_command_manager_register (manager, &builtins [i]);
+   }
+}
+
+static void
 fig_command_manager_finalize (GObject *object)
 {
    FigCommandManagerPrivate *priv;
@@ -131,10 +146,6 @@ fig_command_manager_class_init (FigCommandManagerClass *klass)
 static void
 fig_command_manager_init (FigCommandManager *manager)
 {
-   FigCommandInfo builtins[] = {
-      { "init", "Initialize a new project.", FIG_TYPE_INIT_COMMAND },
-   };
-   int i;
 
    manager->priv = G_TYPE_INSTANCE_GET_PRIVATE (manager,
                                                 FIG_TYPE_COMMAND_MANAGER,
@@ -146,10 +157,5 @@ fig_command_manager_init (FigCommandManager *manager)
                              NULL,
                              (GDestroyNotify)fig_command_info_free);
 
-   /*
-    * Register built in functions.
-    */
-   for (i = 0; i < G_N_ELEMENTS (builtins); i++) {
-      fig_command_manager_register (manager, &builtins [i]);
-   }
+   fig_command_manager_register_builtins (manager);
 }
