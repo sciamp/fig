@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "fig-cli.h"
+#include "fig-command.h"
 #include "fig-command-info.h"
 #include "fig-command-manager.h"
 #include "fig-util.h"
@@ -170,13 +171,43 @@ fig_cli_print_help (FigCli        *cli,
    g_string_free (str, TRUE);
 }
 
+static void
+fig_cli_print_stderr (FigCli      *cli,
+                      const gchar *format,
+                      ...) G_GNUC_PRINTF (2, 3);
+
+static void
+fig_cli_print_stderr (FigCli      *cli,
+                      const gchar *format,
+                      ...)
+{
+   va_list args;
+   gchar *str;
+
+   g_return_if_fail (FIG_IS_CLI (cli));
+   g_return_if_fail (format);
+
+   va_start (args, format);
+   str = g_strdup_vprintf (format, args);
+   va_end (args);
+
+   if (str) {
+      g_output_stream_write_all (cli->priv->stderr_stream, str,
+                                 strlen (str), NULL, NULL, NULL);
+   }
+
+   g_free (str);
+}
+
 gint
 fig_cli_run (FigCli  *cli,
              gint     argc,
              gchar  **argv)
 {
+   FigCommandInfo *info = NULL;
    FigCliPrivate *priv;
-   const gchar *command;
+   const gchar *command_name;
+   FigCommand *command = NULL;
    gboolean contains_help;
    gchar **strv;
    gint ret = EXIT_SUCCESS;
@@ -203,8 +234,8 @@ fig_cli_run (FigCli  *cli,
     * Check to see if a command was specified. If not we need to print out
     * an error. Otherwise, pass execution to the command.
     */
-   command = fig_util_get_command_name (strv);
-   if (!command) {
+   command_name = fig_util_get_command_name (strv);
+   if (!command_name) {
       if (contains_help) {
          fig_cli_print_help (cli, strv [0], priv->stdout_stream);
          goto cleanup;
@@ -215,7 +246,45 @@ fig_cli_run (FigCli  *cli,
       }
    }
 
+   /*
+    * Lookup to see if we have the command.
+    */
+   info = fig_command_manager_lookup (FIG_COMMAND_MANAGER_DEFAULT,
+                                      command_name);
+   if (!info) {
+      fig_cli_print_stderr (cli,
+                            "fig: '%s' is not a fig command. "
+                            "See 'fig --help'.\n",
+                            command_name);
+      ret = EXIT_FAILURE;
+      goto cleanup;
+   }
+
+   /*
+    * Create the command from our command info.
+    */
+   command = g_object_new (info->command_type,
+                           //"project-dir", project_dir,
+                           //"stderr-stream", priv->stderr_stream,
+                           //"stdout-stream", priv->stdout_stream,
+                           NULL);
+   if (!command) {
+      fig_cli_print_stderr (cli,
+                            "fig: '%s' command failed to initialize. "
+                            "Please check your installation.\n",
+                            command_name);
+      ret = EXIT_FAILURE;
+      goto cleanup;
+   }
+
+   /*
+    * Execute the command.
+    */
+   ret = fig_command_run (command, argc, strv);
+
 cleanup:
+   g_clear_object (&command);
+   fig_command_info_free (info);
    g_strfreev (strv);
 
    return ret;

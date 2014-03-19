@@ -17,6 +17,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <stdlib.h>
 
 #include "fig-command.h"
 
@@ -36,31 +37,18 @@ enum
 
 static GParamSpec *gParamSpecs [LAST_PROP];
 
-GOptionGroup *
-fig_command_get_option_group (FigCommand *command)
-{
-   g_return_val_if_fail (FIG_IS_COMMAND (command), NULL);
-
-   if (FIG_COMMAND_GET_CLASS (command)->get_option_group) {
-      return FIG_COMMAND_GET_CLASS (command)->get_option_group (command);
-   }
-
-   return NULL;
-}
-
 gint
 fig_command_run (FigCommand  *command,
                  gint         argc,
-                 gchar      **argv,
-                 GError     **error)
+                 gchar      **argv)
 {
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
 
    if (FIG_COMMAND_GET_CLASS (command)->run) {
-      return FIG_COMMAND_GET_CLASS (command)->run (command, argc, argv, error);
+      return FIG_COMMAND_GET_CLASS (command)->run (command, argc, argv);
    }
 
-   return 0;
+   return EXIT_SUCCESS;
 }
 
 GFile *
