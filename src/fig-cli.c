@@ -146,7 +146,7 @@ fig_cli_print_help (FigCli        *cli,
    g_string_append_printf (str, "  %s ", prgname);
    g_string_append (str, "[OPTION...] <command> <args>\n"
                          "\n"
-                         "  Fig is a tool to help manage autotools projects.\n"
+                         "Fig is a tool to help manage autotools projects.\n"
                          "\n"
                          "Help Options:\n"
                          "  --help                 Show help options\n"
@@ -265,8 +265,8 @@ fig_cli_run (FigCli  *cli,
     */
    command = g_object_new (info->command_type,
                            //"project-dir", project_dir,
-                           //"stderr-stream", priv->stderr_stream,
-                           //"stdout-stream", priv->stdout_stream,
+                           "stderr-stream", priv->stderr_stream,
+                           "stdout-stream", priv->stdout_stream,
                            NULL);
    if (!command) {
       fig_cli_print_stderr (cli,

@@ -52,13 +52,13 @@ struct _FigCommandClass
                 gchar      **argv);
 };
 
-GType         fig_command_get_type         (void) G_GNUC_CONST;
-GFile        *fig_command_get_project_dir  (FigCommand  *command);
-void          fig_command_set_project_dir  (FigCommand  *command,
-                                            GFile       *directory);
-gint          fig_command_run              (FigCommand  *command,
-                                            gint         argc,
-                                            gchar      **argv);
+GType          fig_command_get_type          (void) G_GNUC_CONST;
+GOutputStream *fig_command_get_stderr_stream (FigCommand *command);
+GOutputStream *fig_command_get_stdout_stream (FigCommand *command);
+GFile         *fig_command_get_project_dir   (FigCommand  *command);
+gint           fig_command_run               (FigCommand  *command,
+                                              gint         argc,
+                                              gchar      **argv);
 
 G_END_DECLS
 
