@@ -151,6 +151,10 @@ fig_cli_print_help (FigCli        *cli,
                          "Help Options:\n"
                          "  --help                 Show help options\n"
                          "\n"
+                         "Fig Options:\n"
+                         "  --project-dir=DIR      The directory of the project.\n"
+                         "                         Defaults to current directory.\n"
+                         "\n"
                          "Commands:\n");
 
    list = fig_command_manager_get_commands (FIG_COMMAND_MANAGER_DEFAULT);
@@ -209,7 +213,7 @@ fig_cli_run (FigCli  *cli,
    gchar *project_dir = NULL;
    GOptionContext *context = NULL;
    GOptionEntry entries[] = {
-      { "project-dir", 'd', 0, G_OPTION_ARG_FILENAME, &project_dir,
+      { "project-dir", 0, 0, G_OPTION_ARG_FILENAME, &project_dir,
         "The directory containing the project.", "DIR" },
       { NULL }
    };
