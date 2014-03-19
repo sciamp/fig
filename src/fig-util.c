@@ -21,11 +21,16 @@
 #include "fig-util.h"
 
 const gchar *
-fig_util_get_command_name (gchar **argv)
+fig_util_get_command_name (gchar **argv,
+                           gint   *command_index)
 {
    gint i;
 
    g_return_val_if_fail (argv, NULL);
+
+   if (command_index) {
+      *command_index = -1;
+   }
 
    /*
     * Discover the command name after skipping known internal parameters
@@ -42,6 +47,9 @@ fig_util_get_command_name (gchar **argv)
             }
          }
       } else {
+         if (command_index) {
+            *command_index = i;
+         }
          return argv [i];
       }
    }

@@ -12,27 +12,35 @@ test_fig_util_get_command_name (void)
    const gchar *args6[] = { "dummy", "--project-dir=", "init", "--help", NULL };
    const gchar *args7[] = { "dummy", "--project-dir=abc", "init", "--help", NULL };
    const gchar *ret;
+   gint i;
 
-   ret = fig_util_get_command_name ((gchar **)args1);
+   ret = fig_util_get_command_name ((gchar **)args1, &i);
    g_assert (!ret);
+   g_assert_cmpint (i, ==, -1);
 
-   ret = fig_util_get_command_name ((gchar **)args2);
+   ret = fig_util_get_command_name ((gchar **)args2, &i);
    g_assert_cmpstr (ret, ==, "init");
+   g_assert_cmpint (i, ==, 2);
 
-   ret = fig_util_get_command_name ((gchar **)args3);
+   ret = fig_util_get_command_name ((gchar **)args3, &i);
    g_assert_cmpstr (ret, ==, "init");
+   g_assert_cmpint (i, ==, 2);
 
-   ret = fig_util_get_command_name ((gchar **)args4);
+   ret = fig_util_get_command_name ((gchar **)args4, &i);
    g_assert_cmpstr (ret, ==, "init");
+   g_assert_cmpint (i, ==, 2);
 
-   ret = fig_util_get_command_name ((gchar **)args5);
+   ret = fig_util_get_command_name ((gchar **)args5, &i);
    g_assert (!ret);
+   g_assert_cmpint (i, ==, -1);
 
-   ret = fig_util_get_command_name ((gchar **)args6);
+   ret = fig_util_get_command_name ((gchar **)args6, &i);
    g_assert_cmpstr (ret, ==, "init");
+   g_assert_cmpint (i, ==, 2);
 
-   ret = fig_util_get_command_name ((gchar **)args7);
+   ret = fig_util_get_command_name ((gchar **)args7, &i);
    g_assert_cmpstr (ret, ==, "init");
+   g_assert_cmpint (i, ==, 2);
 }
 
 gint

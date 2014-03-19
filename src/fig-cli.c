@@ -210,6 +210,8 @@ fig_cli_run (FigCli  *cli,
    FigCommand *command = NULL;
    gboolean contains_help;
    gchar **strv;
+   gchar **cmd_argv;
+   gint command_index = -1;
    gint ret = EXIT_SUCCESS;
    gint i;
 
@@ -234,7 +236,7 @@ fig_cli_run (FigCli  *cli,
     * Check to see if a command was specified. If not we need to print out
     * an error. Otherwise, pass execution to the command.
     */
-   command_name = fig_util_get_command_name (strv);
+   command_name = fig_util_get_command_name (strv, &command_index);
    if (!command_name) {
       if (contains_help) {
          fig_cli_print_help (cli, strv [0], priv->stdout_stream);
@@ -278,9 +280,17 @@ fig_cli_run (FigCli  *cli,
    }
 
    /*
+    * Create our arguments for the command. We simply bump up the argv
+    * so that it appears as the command-name is argv[0].
+    */
+   g_assert (command_index > 0);
+   cmd_argv = &strv [command_index];
+
+
+   /*
     * Execute the command.
     */
-   ret = fig_command_run (command, argc, strv);
+   ret = fig_command_run (command, g_strv_length (cmd_argv), cmd_argv);
 
 cleanup:
    g_clear_object (&command);
