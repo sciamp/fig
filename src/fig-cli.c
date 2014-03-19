@@ -16,10 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gio/gio.h>
+#include <gio/gunixoutputstream.h>
 #include <glib/gi18n.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "fig-cli.h"
+#include "fig-command-info.h"
+#include "fig-command-manager.h"
+#include "fig-util.h"
 
 struct _FigCliPrivate
 {
@@ -38,6 +45,24 @@ enum
 G_DEFINE_TYPE_WITH_PRIVATE (FigCli, fig_cli, G_TYPE_OBJECT)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
+
+static gboolean
+strv_contains (gchar       **strv,
+               const gchar  *needle)
+{
+   gint i;
+
+   g_return_val_if_fail (strv, FALSE);
+   g_return_val_if_fail (needle, FALSE);
+
+   for (i = 0; strv [i]; i++) {
+      if (0 == strcmp (strv [i], needle)) {
+         return TRUE;
+      }
+   }
+
+   return FALSE;
+}
 
 FigCli *
 fig_cli_new (void)
@@ -103,14 +128,97 @@ fig_cli_set_stdout_stream (FigCli        *cli,
    }
 }
 
+static void
+fig_cli_print_help (FigCli        *cli,
+                    const gchar   *prgname,
+                    GOutputStream *stream)
+{
+   FigCommandInfo *info;
+   GString *str;
+   GList *list;
+   GList *iter;
+
+   g_return_if_fail (FIG_IS_CLI (cli));
+   g_return_if_fail (G_IS_OUTPUT_STREAM (stream));
+
+   str = g_string_new ("Usage:\n");
+   g_string_append_printf (str, "  %s ", prgname);
+   g_string_append (str, "[OPTION...] <command> <args>\n"
+                         "\n"
+                         "  Fig is a tool to help manage autotools projects.\n"
+                         "\n"
+                         "Help Options:\n"
+                         "  --help                 Show help options\n"
+                         "\n"
+                         "Commands:\n");
+
+   list = fig_command_manager_get_commands (FIG_COMMAND_MANAGER_DEFAULT);
+
+   for (iter = list; iter; iter = iter->next) {
+      info = iter->data;
+      g_string_append_printf (str, "  %-22s %s\n",
+                              info->name,
+                              info->description);
+   }
+
+   g_string_append (str, "\n"
+                         "Examples:\n"
+                         "  fig --project-dir=foo init\n"
+                         "\n");
+
+   g_output_stream_write_all (stream, str->str, str->len, NULL, NULL, NULL);
+   g_string_free (str, TRUE);
+}
+
 gint
 fig_cli_run (FigCli  *cli,
              gint     argc,
              gchar  **argv)
 {
-   g_return_val_if_fail (FIG_IS_CLI (cli), -1);
+   FigCliPrivate *priv;
+   const gchar *command;
+   gboolean contains_help;
+   gchar **strv;
+   gint ret = EXIT_SUCCESS;
+   gint i;
 
-   return EXIT_SUCCESS;
+   g_return_val_if_fail (FIG_IS_CLI (cli), -1);
+   g_return_val_if_fail (argc, -1);
+   g_return_val_if_fail (argv, -1);
+
+   priv = cli->priv;
+
+   /*
+    * Convert argc/argv into a GStrv.
+    */
+   strv = g_new (gchar *, argc + 1);
+   for (i = 0; i < argc; i++) {
+      strv [i] = g_strdup (argv [i]);
+   }
+   strv [argc] = NULL;
+
+   contains_help = strv_contains (strv, "--help");
+
+   /*
+    * Check to see if a command was specified. If not we need to print out
+    * an error. Otherwise, pass execution to the command.
+    */
+   command = fig_util_get_command_name (strv);
+   if (!command) {
+      if (contains_help) {
+         fig_cli_print_help (cli, strv [0], priv->stdout_stream);
+         goto cleanup;
+      } else {
+         fig_cli_print_help (cli, strv [0], priv->stderr_stream);
+         ret = EXIT_FAILURE;
+         goto cleanup;
+      }
+   }
+
+cleanup:
+   g_strfreev (strv);
+
+   return ret;
 }
 
 static void
@@ -199,4 +307,6 @@ static void
 fig_cli_init (FigCli *cli)
 {
    cli->priv = fig_cli_get_instance_private (cli);
+   cli->priv->stderr_stream = g_unix_output_stream_new (STDERR_FILENO, FALSE);
+   cli->priv->stdout_stream = g_unix_output_stream_new (STDOUT_FILENO, FALSE);
 }

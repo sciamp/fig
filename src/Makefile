@@ -1,7 +1,7 @@
 all: fig tests
 
 MV := mv
-PKGS = gio-2.0 gmodule-2.0
+PKGS = gio-unix-2.0 gmodule-2.0
 
 TMPL_DIR := $(shell pwd)/templates
 PLGN_DIR := $(shell pwd)/plugins
