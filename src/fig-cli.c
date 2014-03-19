@@ -206,11 +206,23 @@ fig_cli_run (FigCli  *cli,
 {
    FigCommandInfo *info = NULL;
    FigCliPrivate *priv;
+   gchar *project_dir = NULL;
+   GOptionContext *context = NULL;
+   GOptionEntry entries[] = {
+      { "project-dir", 'd', 0, G_OPTION_ARG_FILENAME, &project_dir,
+        "The directory containing the project.", "DIR" },
+      { NULL }
+   };
    const gchar *command_name;
    FigCommand *command = NULL;
    gboolean contains_help;
+   gboolean r;
+   GError *error = NULL;
    gchar **strv;
+   gchar **strv_copy;
    gchar **cmd_argv;
+   GFile *project_dir_file = NULL;
+   gint strv_copy_count;
    gint command_index = -1;
    gint ret = EXIT_SUCCESS;
    gint i;
@@ -249,6 +261,45 @@ fig_cli_run (FigCli  *cli,
    }
 
    /*
+    * Show help early before parsing commands if we need to.
+    */
+   g_assert (command_index > 0);
+   for (i = 0; i < command_index; i++) {
+      if (g_str_equal ("--help", strv [i])) {
+         fig_cli_print_help (cli, strv [0], priv->stdout_stream);
+         goto cleanup;
+      }
+   }
+
+   /*
+    * Make a copy of the args for the cli since GOptionContext will
+    * mutate them.
+    */
+   strv_copy = g_strdupv (strv);
+   for (i = command_index; strv_copy [i]; i++) {
+      g_free (strv_copy [i]);
+      strv_copy [i] = NULL;
+   }
+   strv_copy_count = g_strv_length (strv_copy);
+
+   /*
+    * Parse command line options up to the command name.
+    */
+   context = g_option_context_new ("<command> <args>");
+   g_option_context_add_main_entries (context, entries, NULL);
+   g_option_context_set_summary (
+         context,
+         "Fig is a tool to help manage autotools projects.");
+   g_option_context_set_help_enabled (context, FALSE);
+   r = g_option_context_parse (context, &strv_copy_count, &strv_copy, &error);
+   g_strfreev (strv_copy);
+   if (!r) {
+      fig_cli_print_stderr (cli, "%s\n", error->message);
+      g_clear_error (&error);
+      goto cleanup;
+   }
+
+   /*
     * Lookup to see if we have the command.
     */
    info = fig_command_manager_lookup (FIG_COMMAND_MANAGER_DEFAULT,
@@ -265,8 +316,9 @@ fig_cli_run (FigCli  *cli,
    /*
     * Create the command from our command info.
     */
+   project_dir_file = g_file_new_for_path (project_dir ?: ".");
    command = g_object_new (info->command_type,
-                           //"project-dir", project_dir,
+                           "project-dir", project_dir_file,
                            "stderr-stream", priv->stderr_stream,
                            "stdout-stream", priv->stdout_stream,
                            NULL);
@@ -283,7 +335,6 @@ fig_cli_run (FigCli  *cli,
     * Create our arguments for the command. We simply bump up the argv
     * so that it appears as the command-name is argv[0].
     */
-   g_assert (command_index > 0);
    cmd_argv = &strv [command_index];
 
 
@@ -293,9 +344,12 @@ fig_cli_run (FigCli  *cli,
    ret = fig_command_run (command, g_strv_length (cmd_argv), cmd_argv);
 
 cleanup:
+   g_clear_pointer (&context, g_option_context_free);
    g_clear_object (&command);
+   g_clear_object (&project_dir_file);
    fig_command_info_free (info);
    g_strfreev (strv);
+   g_free (project_dir);
 
    return ret;
 }
