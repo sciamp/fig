@@ -11,7 +11,7 @@ if [ -d "${TEST_DIR}" ]; then
     rm -rf "${TEST_DIR}"
 fi
 
-./fig -d "${TEST_DIR}" init
-./fig -d "${TEST_DIR}" add-target --library foobar-1.0
-./fig -d "${TEST_DIR}" add-target --program baz
+./fig --project-dir "${TEST_DIR}" init
+./fig --project-dir "${TEST_DIR}" add-target --library foobar-1.0
+./fig --project-dir "${TEST_DIR}" add-target --program baz
 
