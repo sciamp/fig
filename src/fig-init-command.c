@@ -132,8 +132,14 @@ fig_init_command_parse (FigInitCommand  *command,
                         gint             argc,
                         gchar          **argv)
 {
+   gchar *name = NULL;
+   gchar *version = NULL;
    GOptionContext *context;
    GOptionEntry entries[] = {
+      { "name", 'n', 0, G_OPTION_ARG_STRING, &name,
+        _("The name of the project."), _("foo") },
+      { "version", 'V', 0, G_OPTION_ARG_STRING, &version,
+        _("The starting version of the project."), _("0.1.0") },
       { NULL }
    };
    gboolean ret = FALSE;
@@ -153,12 +159,17 @@ fig_init_command_parse (FigInitCommand  *command,
       goto cleanup;
    }
 
+   fig_init_command_set_name (command, name);
+   fig_init_command_set_version (command, version);
+
    ret = TRUE;
 
 cleanup:
    g_option_context_free (context);
    g_strfreev (argv_copy);
    g_clear_error (&error);
+   g_free (name);
+   g_free (version);
 
    return ret;
 }
