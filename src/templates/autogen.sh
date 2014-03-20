@@ -26,7 +26,7 @@ fi
 for group in ac am config output lt; do
     for mode in pre post; do
         FILE="build/autotools/configure.d/${mode}-${group}.m4"
-        cat build/autotools/configure.d/*.${mode}-${group} > ${FILE}
+        cat build/autotools/configure.d/*.${mode}-${group} 2>/dev/null> ${FILE}
     done
 done
 
