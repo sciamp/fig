@@ -100,6 +100,28 @@ fig_command_set_stdout_stream (FigCommand    *command,
    }
 }
 
+void
+fig_command_log (FigCommand  *command,
+                 const gchar *program,
+                 const gchar *format,
+                 ...)
+{
+   va_list args;
+   gchar *message;
+   gchar *full;
+
+   va_start (args, format);
+   message = g_strdup_vprintf (format, args);
+   va_end (args);
+
+   full = g_strdup_printf ("  %-10s %s\n", program, format);
+   g_free (message);
+
+   g_output_stream_write_all (command->priv->stdout_stream,
+                              full, strlen (full), NULL, NULL, NULL);
+   g_free (full);
+}
+
 gint
 fig_command_run (FigCommand  *command,
                  gint         argc,

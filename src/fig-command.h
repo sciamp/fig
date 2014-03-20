@@ -56,6 +56,10 @@ GType          fig_command_get_type          (void) G_GNUC_CONST;
 GOutputStream *fig_command_get_stderr_stream (FigCommand *command);
 GOutputStream *fig_command_get_stdout_stream (FigCommand *command);
 GFile         *fig_command_get_project_dir   (FigCommand  *command);
+void           fig_command_log               (FigCommand  *command,
+                                              const gchar *program,
+                                              const gchar *format,
+                                              ...) G_GNUC_PRINTF (3, 4);
 gint           fig_command_run               (FigCommand  *command,
                                               gint         argc,
                                               gchar      **argv);

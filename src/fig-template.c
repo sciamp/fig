@@ -112,16 +112,6 @@ fig_template_render (FigTemplate  *template,
       g_free (path);
    }
 
-   {
-      gchar *f1, *f2;
-
-      f1 = g_file_get_path (src);
-      f2 = g_file_get_path (file);
-      g_message ("%s => %s", f1, f2);
-      g_free  (f1);
-      g_free  (f2);
-   }
-
    g_assert (G_IS_FILE (src));
    g_assert (G_IS_FILE (file));
 

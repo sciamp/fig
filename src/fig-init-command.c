@@ -145,6 +145,11 @@ fig_init_command_set_license (FigInitCommand *command,
 {
    g_return_if_fail (FIG_IS_INIT_COMMAND (command));
 
+   if (license && strstr (license, "/")) {
+      g_printerr ("license cannot be a path.\n");
+      return;
+   }
+
    g_free (command->priv->license);
    command->priv->license = g_strdup (license);
    g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_LICENSE]);
@@ -168,6 +173,8 @@ render_template (FigCommand  *command,
    g_assert (G_IS_FILE (directory));
 
    dst = g_file_get_child (directory, target_name ? target_name : name);
+
+   fig_command_log (command, "GEN", target_name ? target_name : name);
 
    if (!fig_template_render (tmpl, dst, &error)) {
       g_printerr ("%s: %s\n", name, error->message);
@@ -211,6 +218,7 @@ render_project_info (FigInitCommand *command)
 
    file = g_file_get_child (parent, "build/autotools/project_info.m4");
 
+   fig_command_log (FIG_COMMAND (command), "GEN", "build/autotools/project_info.m4");
    g_file_replace_contents (file, str->str, str->len, NULL, FALSE,
                             G_FILE_CREATE_NONE, NULL, NULL, NULL);
 
