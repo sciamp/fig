@@ -25,6 +25,7 @@ struct _FigInitCommandPrivate
 {
    gchar    *name;
    gchar    *version;
+   gchar    *license;
    gboolean  gtk_doc;
    gint      version_major;
    gint      version_minor;
@@ -35,14 +36,13 @@ enum
 {
    PROP_0,
    PROP_GTK_DOC,
+   PROP_LICENSE,
    PROP_NAME,
    PROP_VERSION,
    LAST_PROP
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (FigInitCommand,
-                            fig_init_command,
-                            FIG_TYPE_COMMAND)
+G_DEFINE_TYPE_WITH_PRIVATE (FigInitCommand, fig_init_command, FIG_TYPE_COMMAND)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
 
@@ -122,6 +122,25 @@ fig_init_command_set_version (FigInitCommand *command,
    g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_VERSION]);
 }
 
+const gchar *
+fig_init_command_get_license (FigInitCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_INIT_COMMAND (command), NULL);
+
+   return command->priv->license;
+}
+
+void
+fig_init_command_set_license (FigInitCommand *command,
+                              const gchar    *license)
+{
+   g_return_if_fail (FIG_IS_INIT_COMMAND (command));
+
+   g_free (command->priv->license);
+   command->priv->license = g_strdup (license);
+   g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_LICENSE]);
+}
+
 static void
 render_template (FigCommand  *command,
                  const gchar *name,
@@ -198,9 +217,12 @@ fig_init_command_parse (FigInitCommand  *command,
 {
    gchar *name = NULL;
    gchar *version = NULL;
+   gchar *license = NULL;
    gboolean gtkdoc = FALSE;
    GOptionContext *context;
    GOptionEntry entries[] = {
+      { "license", 'l', 0, G_OPTION_ARG_STRING, &license,
+        _("The license for the project."), _("gpl-3.0") },
       { "name", 'n', 0, G_OPTION_ARG_STRING, &name,
         _("The name of the project."), _("foo") },
       { "version", 'V', 0, G_OPTION_ARG_STRING, &version,
@@ -226,6 +248,7 @@ fig_init_command_parse (FigInitCommand  *command,
       goto cleanup;
    }
 
+   fig_init_command_set_license (command, license);
    fig_init_command_set_name (command, name);
    fig_init_command_set_version (command, version);
    fig_init_command_set_gtk_doc (command, gtkdoc);
@@ -257,6 +280,10 @@ fig_init_command_run (FigCommand  *command,
 
    if (!fig_init_command_parse (FIG_INIT_COMMAND (command), argc, argv)) {
       return EXIT_FAILURE;
+   }
+
+   if (priv->license) {
+      license = priv->license;
    }
 
    license_path = g_strdup_printf ("licenses/%s.txt", license);
@@ -319,6 +346,9 @@ fig_init_command_get_property (GObject    *object,
    case PROP_GTK_DOC:
       g_value_set_boolean (value, fig_init_command_get_gtk_doc (command));
       break;
+   case PROP_LICENSE:
+      g_value_set_string (value, fig_init_command_get_license (command));
+      break;
    case PROP_NAME:
       g_value_set_string (value, fig_init_command_get_name (command));
       break;
@@ -344,6 +374,9 @@ fig_init_command_set_property (GObject      *object,
    switch (prop_id) {
    case PROP_GTK_DOC:
       fig_init_command_set_gtk_doc (command, g_value_get_boolean (value));
+      break;
+   case PROP_LICENSE:
+      fig_init_command_set_license (command, g_value_get_string (value));
       break;
    case PROP_NAME:
       fig_init_command_set_name (command, g_value_get_string (value));
@@ -380,6 +413,16 @@ fig_init_command_class_init (FigInitCommandClass *klass)
    g_object_class_install_property (object_class, PROP_GTK_DOC,
                                     gParamSpecs [PROP_GTK_DOC]);
 
+   gParamSpecs [PROP_LICENSE] =
+      g_param_spec_string ("license",
+                           _("License"),
+                           _("The license for the project."),
+                           "gpl-3.0",
+                           (G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_LICENSE,
+                                    gParamSpecs [PROP_LICENSE]);
+
    gParamSpecs [PROP_NAME] =
       g_param_spec_string ("name",
                            _("Name"),
@@ -405,4 +448,11 @@ static void
 fig_init_command_init (FigInitCommand *command)
 {
    command->priv = fig_init_command_get_instance_private (command);
+
+   command->priv->name = g_strdup ("foo");
+
+   command->priv->license = g_strdup ("gpl-3.0");
+
+   command->priv->version = g_strdup ("0.1.0");
+   command->priv->version_minor = 1;
 }
