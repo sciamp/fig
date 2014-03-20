@@ -20,6 +20,7 @@
 
 #include "fig-command-manager.h"
 #include "fig-init-command.h"
+#include "fig-update-authors-command.h"
 
 G_DEFINE_TYPE (FigCommandManager, fig_command_manager, G_TYPE_OBJECT)
 
@@ -110,7 +111,8 @@ static void
 fig_command_manager_register_builtins (FigCommandManager *manager)
 {
    const FigCommandInfo builtins [] = {
-      { "init", "Initialize a new project.", FIG_TYPE_INIT_COMMAND },
+      { "init",           "Initialize a new project.",              FIG_TYPE_INIT_COMMAND },
+      { "update-authors", "Update the AUTHORS file for a project.", FIG_TYPE_UPDATE_AUTHORS_COMMAND },
    };
    int i;
 

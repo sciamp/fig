@@ -23,6 +23,7 @@ OBJS = \
 	fig-command-info.o \
 	fig-command-manager.o \
 	fig-init-command.o \
+	fig-update-authors-command.o \
 	fig-template.o \
 	fig-util.o
 
