@@ -33,9 +33,6 @@ done
 # Run autoconf to build configure.
 autoreconf --force --install --verbose -I build/autotools ${ACLOCAL_FLAGS} || exit $?
 
-# Remove unnecessary temporary directory from autoreconf.
-rm -rf autom4te.cache
-
 # Return to the original directory.
 cd "$olddir"
 

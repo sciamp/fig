@@ -241,9 +241,11 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "README", NULL);
    render_template (command, "autogen.sh", NULL);
    render_template (command, "configure.ac", NULL);
+   render_template (command, ".gitignore", NULL);
 
    render_template (command, "build/autotools/setup_libtool.m4", NULL);
    render_template (command, "build/autotools/print_config.m4", NULL);
+   render_template (command, "build/autotools/.gitignore", NULL);
 
    render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
    render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
