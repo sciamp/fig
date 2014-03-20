@@ -23,6 +23,8 @@
 
 G_BEGIN_DECLS
 
+#define FIG_TYPE_TARGET_TYPE (fig_target_type_get_type())
+
 typedef enum
 {
    FIG_TARGET_LIBRARY = 1,

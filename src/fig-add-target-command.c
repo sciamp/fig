@@ -22,13 +22,15 @@
 
 struct _FigAddTargetCommandPrivate
 {
-   gchar *name;
+   gchar         *name;
+   FigTargetType  target_type;
 };
 
 enum
 {
    PROP_0,
    PROP_NAME,
+   PROP_TARGET_TYPE,
    LAST_PROP
 };
 
@@ -57,6 +59,24 @@ fig_add_target_command_set_name (FigAddTargetCommand *command,
    g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_NAME]);
 }
 
+FigTargetType
+fig_add_target_command_get_target_type (FigAddTargetCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_ADD_TARGET_COMMAND (command), 0);
+
+   return command->priv->target_type;
+}
+
+void
+fig_add_target_command_set_target_type (FigAddTargetCommand *command,
+                                        FigTargetType        target_type)
+{
+   g_return_if_fail (FIG_IS_ADD_TARGET_COMMAND (command));
+   command->priv->target_type = target_type;
+   g_object_notify_by_pspec (G_OBJECT (command),
+                             gParamSpecs [PROP_TARGET_TYPE]);
+}
+
 static void
 fig_add_target_command_finalize (GObject *object)
 {
@@ -81,6 +101,10 @@ fig_add_target_command_get_property (GObject    *object,
    case PROP_NAME:
       g_value_set_string (value, fig_add_target_command_get_name (command));
       break;
+   case PROP_TARGET_TYPE:
+      g_value_set_enum (value,
+                        fig_add_target_command_get_target_type (command));
+      break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
    }
@@ -97,6 +121,10 @@ fig_add_target_command_set_property (GObject      *object,
    switch (prop_id) {
    case PROP_NAME:
       fig_add_target_command_set_name (command, g_value_get_string (value));
+      break;
+   case PROP_TARGET_TYPE:
+      fig_add_target_command_set_target_type (command,
+                                              g_value_get_enum (value));
       break;
    default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -122,10 +150,22 @@ fig_add_target_command_class_init (FigAddTargetCommandClass *klass)
                             G_PARAM_STATIC_STRINGS));
    g_object_class_install_property (object_class, PROP_NAME,
                                     gParamSpecs [PROP_NAME]);
+
+   gParamSpecs [PROP_TARGET_TYPE] =
+      g_param_spec_enum ("target-type",
+                         _("Target Type"),
+                         _("The type of the target to add."),
+                         FIG_TYPE_TARGET_TYPE,
+                         FIG_TARGET_PROGRAM,
+                         (G_PARAM_READWRITE |
+                          G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_TARGET_TYPE,
+                                    gParamSpecs [PROP_TARGET_TYPE]);
 }
 
 static void
 fig_add_target_command_init (FigAddTargetCommand *command)
 {
    command->priv = fig_add_target_command_get_instance_private (command);
+   command->priv->target_type = FIG_TARGET_PROGRAM;
 }

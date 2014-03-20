@@ -20,6 +20,7 @@
 #define FIG_ADD_TARGET_COMMAND_H
 
 #include "fig-command.h"
+#include "fig-target-type.h"
 
 G_BEGIN_DECLS
 
