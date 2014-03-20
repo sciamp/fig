@@ -23,16 +23,18 @@
 
 struct _FigInitCommandPrivate
 {
-   gchar *name;
-   gchar *version;
-   gint   version_major;
-   gint   version_minor;
-   gint   version_micro;
+   gchar    *name;
+   gchar    *version;
+   gboolean  gtk_doc;
+   gint      version_major;
+   gint      version_minor;
+   gint      version_micro;
 };
 
 enum
 {
    PROP_0,
+   PROP_GTK_DOC,
    PROP_NAME,
    PROP_VERSION,
    LAST_PROP
@@ -43,6 +45,24 @@ G_DEFINE_TYPE_WITH_PRIVATE (FigInitCommand,
                             FIG_TYPE_COMMAND)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
+
+gboolean
+fig_init_command_get_gtk_doc (FigInitCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_INIT_COMMAND (command), FALSE);
+
+   return command->priv->gtk_doc;
+}
+
+void
+fig_init_command_set_gtk_doc (FigInitCommand *command,
+                              gboolean        gtk_doc)
+{
+   g_return_if_fail (FIG_IS_INIT_COMMAND (command));
+
+   command->priv->gtk_doc = gtk_doc;
+   g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_GTK_DOC]);
+}
 
 const gchar *
 fig_init_command_get_name (FigInitCommand *command)
@@ -178,12 +198,15 @@ fig_init_command_parse (FigInitCommand  *command,
 {
    gchar *name = NULL;
    gchar *version = NULL;
+   gboolean gtkdoc = FALSE;
    GOptionContext *context;
    GOptionEntry entries[] = {
       { "name", 'n', 0, G_OPTION_ARG_STRING, &name,
         _("The name of the project."), _("foo") },
       { "version", 'V', 0, G_OPTION_ARG_STRING, &version,
         _("The starting version of the project."), _("0.1.0") },
+      { "gtk-doc", 0, 0, G_OPTION_ARG_NONE, &gtkdoc,
+        _("Add support for gtk-doc documentation.") },
       { NULL }
    };
    gboolean ret = FALSE;
@@ -205,6 +228,7 @@ fig_init_command_parse (FigInitCommand  *command,
 
    fig_init_command_set_name (command, name);
    fig_init_command_set_version (command, version);
+   fig_init_command_set_gtk_doc (command, gtkdoc);
 
    ret = TRUE;
 
@@ -223,10 +247,13 @@ fig_init_command_run (FigCommand  *command,
                       gint         argc,
                       gchar      **argv)
 {
+   FigInitCommandPrivate *priv;
    const gchar *license = "gpl-3.0";
    gchar *license_path;
 
    g_return_val_if_fail (FIG_IS_COMMAND (command), -1);
+
+   priv = FIG_INIT_COMMAND (command)->priv;
 
    if (!fig_init_command_parse (FIG_INIT_COMMAND (command), argc, argv)) {
       return EXIT_FAILURE;
@@ -248,7 +275,10 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/.gitignore", NULL);
 
    render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
-   render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
+
+   if (priv->gtk_doc) {
+      render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
+   }
 
    render_template (command, "build/autotools/automake/AutomakeDocs.mk", NULL);
    render_template (command, "build/autotools/automake/ChangeLog.mk", NULL);
@@ -286,6 +316,9 @@ fig_init_command_get_property (GObject    *object,
    FigInitCommand *command = FIG_INIT_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_GTK_DOC:
+      g_value_set_boolean (value, fig_init_command_get_gtk_doc (command));
+      break;
    case PROP_NAME:
       g_value_set_string (value, fig_init_command_get_name (command));
       break;
@@ -309,6 +342,9 @@ fig_init_command_set_property (GObject      *object,
    FigInitCommand *command = FIG_INIT_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_GTK_DOC:
+      fig_init_command_set_gtk_doc (command, g_value_get_boolean (value));
+      break;
    case PROP_NAME:
       fig_init_command_set_name (command, g_value_get_string (value));
       break;
@@ -333,6 +369,16 @@ fig_init_command_class_init (FigInitCommandClass *klass)
 
    command_class = FIG_COMMAND_CLASS (klass);
    command_class->run = fig_init_command_run;
+
+   gParamSpecs [PROP_GTK_DOC] =
+      g_param_spec_boolean ("gtk-doc",
+                           _("Gtk Doc"),
+                           _("If gtk-doc should be enabled."),
+                           FALSE,
+                           (G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_GTK_DOC,
+                                    gParamSpecs [PROP_GTK_DOC]);
 
    gParamSpecs [PROP_NAME] =
       g_param_spec_string ("name",
