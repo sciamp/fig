@@ -1,8 +1,10 @@
 AC_PREREQ(2.60)
 
+m4_include([build/autotools/project_info.m4])
+
 # Initialize autoconf and things that go with it.
 m4_include([build/autotools/configure.d/pre-ac.m4])
-AC_INIT([name],[version])
+AC_INIT([project_name],[project_version],[project_bugreport_url])
 AC_CONFIG_MACRO_DIRS([build/autotools/m4])
 AC_CONFIG_AUX_DIR([build/autotools])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I build/autotools")
@@ -11,7 +13,7 @@ m4_include([build/autotools/configure.d/post-ac.m4])
 
 # Initlize libtool and things that go with it.
 m4_include([build/autotools/configure.d/pre-lt.m4])
-m4_include([build/autotools/configure.d/setup_libtool.m4])
+m4_include([build/autotools/setup_libtool.m4])
 LT_INIT
 m4_include([build/autotools/configure.d/post-lt.m4])
 
@@ -37,8 +39,4 @@ AC_OUTPUT
 m4_include([build/autotools/configure.d/post-output.m4])
 
 # Print configuration information.
-m4_include([build/autotools/configure.d/pre-config.m4])
-echo "
-${name} was configured with the following options:
-"
-m4_include([build/autotools/configure.d/post-config.m4])
+m4_include([build/autotools/print_config.m4])

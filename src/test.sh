@@ -17,4 +17,5 @@ fi
 
 cd test-dir
 ./autogen.sh
+make
 

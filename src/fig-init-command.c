@@ -25,6 +25,9 @@ struct _FigInitCommandPrivate
 {
    gchar *name;
    gchar *version;
+   gint   version_major;
+   gint   version_minor;
+   gint   version_micro;
 };
 
 enum
@@ -90,7 +93,7 @@ fig_init_command_get_version (FigInitCommand *command)
 
 void
 fig_init_command_set_version (FigInitCommand *command,
-                           const gchar    *version)
+                              const gchar    *version)
 {
    g_return_if_fail (FIG_IS_INIT_COMMAND (command));
 
@@ -125,6 +128,47 @@ render_template (FigCommand  *command,
 
    g_object_unref (tmpl);
    g_object_unref (dst);
+}
+
+static void
+render_project_info (FigInitCommand *command)
+{
+   const char *name = command->priv->name;
+   GString *str;
+   GFile *parent;
+   GFile *file;
+   gchar *project_dir_name = NULL;
+
+   parent = fig_command_get_project_dir (FIG_COMMAND (command));
+
+   if (!name) {
+      project_dir_name = g_file_get_basename (parent);
+      if (0 == g_strcmp0 (project_dir_name, ".")) {
+         name = "foo";
+      } else {
+         name = project_dir_name;
+      }
+   }
+
+   str = g_string_new (NULL);
+   g_string_append_printf (str, "m4_define([project_name],[%s])\n", name);
+   g_string_append_printf (str, "m4_define([project_major_version],[%d])\n",
+                           command->priv->version_major);
+   g_string_append_printf (str, "m4_define([project_minor_version],[%d])\n",
+                           command->priv->version_minor);
+   g_string_append_printf (str, "m4_define([project_micro_version],[%d])\n",
+                           command->priv->version_micro);
+   g_string_append (str, "m4_define([project_interface_age],[0])\n");
+   g_string_append (str, "m4_define([project_bugreport_url],[http://])\n");
+
+   file = g_file_get_child (parent, "build/autotools/project_info.m4");
+
+   g_file_replace_contents (file, str->str, str->len, NULL, FALSE,
+                            G_FILE_CREATE_NONE, NULL, NULL, NULL);
+
+   g_object_unref (file);
+   g_string_free (str, TRUE);
+   g_free (project_dir_name);
 }
 
 static gboolean
@@ -198,6 +242,9 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "autogen.sh", NULL);
    render_template (command, "configure.ac", NULL);
 
+   render_template (command, "build/autotools/setup_libtool.m4", NULL);
+   render_template (command, "build/autotools/print_config.m4", NULL);
+
    render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
    render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
 
@@ -212,21 +259,11 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/configure.d/50_silent_rules.post-am", NULL);
    render_template (command, "build/autotools/configure.d/50_versions.pre-ac", NULL);
    render_template (command, "build/autotools/configure.d/90_gtkdoc.post-am", NULL);
-   render_template (command, "build/autotools/configure.d/setup_libtool.m4", NULL);
-
-   render_template (command, "build/autotools/configure.d/empty.post-ac", NULL);
-   render_template (command, "build/autotools/configure.d/empty.post-am", NULL);
-   render_template (command, "build/autotools/configure.d/empty.post-config", NULL);
-   render_template (command, "build/autotools/configure.d/empty.post-lt", NULL);
-   render_template (command, "build/autotools/configure.d/empty.post-output", NULL);
-   render_template (command, "build/autotools/configure.d/empty.pre-ac", NULL);
-   render_template (command, "build/autotools/configure.d/empty.pre-am", NULL);
-   render_template (command, "build/autotools/configure.d/empty.pre-config", NULL);
-   render_template (command, "build/autotools/configure.d/empty.pre-lt", NULL);
-   render_template (command, "build/autotools/configure.d/empty.pre-output", NULL);
 
    render_template (command, "build/autotools/m4/.gitignore", NULL);
    render_template (command, "build/autotools/m4/ax_include_wildcard.m4", NULL);
+
+   render_project_info (FIG_INIT_COMMAND (command));
 
    g_free (license_path);
 
