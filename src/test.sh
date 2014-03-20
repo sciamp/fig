@@ -5,17 +5,30 @@ if [ ! -e "fig-command-info.h" ]; then
     exit 1
 fi
 
+FIG=${PWD}/fig
 TEST_DIR=test-dir
 
 if [ -d "${TEST_DIR}" ]; then
     rm -rf "${TEST_DIR}"
 fi
 
-./fig --project-dir "${TEST_DIR}" init
-./fig --project-dir "${TEST_DIR}" add-target --library foobar-1.0
-./fig --project-dir "${TEST_DIR}" add-target --program baz
+mkdir ${TEST_DIR}
+cd ${TEST_DIR}
 
-cd test-dir
+git init
+
+$FIG  init
+git add .
+git commit -a -m 'initial commit'
+
+$FIG add-target --library foobar-1.0
+$FIG add-target --program baz
+
+$FIG update-authors
+git add .
+git commit -a -m 'update authors'
+
 ./autogen.sh
 make
 
+cd -

@@ -258,10 +258,9 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/configure.d/50_progs.post-am", NULL);
    render_template (command, "build/autotools/configure.d/50_silent_rules.post-am", NULL);
    render_template (command, "build/autotools/configure.d/50_versions.pre-ac", NULL);
-   render_template (command, "build/autotools/configure.d/90_gtkdoc.post-am", NULL);
+   render_template (command, "build/autotools/configure.d/.gitignore", NULL);
 
    render_template (command, "build/autotools/m4/.gitignore", NULL);
-   render_template (command, "build/autotools/m4/ax_include_wildcard.m4", NULL);
 
    render_project_info (FIG_INIT_COMMAND (command));
 
