@@ -17,6 +17,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "fig-init-command.h"
@@ -115,10 +116,18 @@ void
 fig_init_command_set_version (FigInitCommand *command,
                               const gchar    *version)
 {
+   FigInitCommandPrivate *priv;
+
    g_return_if_fail (FIG_IS_INIT_COMMAND (command));
 
-   g_free (command->priv->version);
-   command->priv->version = g_strdup (version);
+   priv = command->priv;
+
+   g_free (priv->version);
+   priv->version = g_strdup (version ? version : "0.1.0");
+   sscanf (priv->version, "%u.%u.%u",
+           &priv->version_major,
+           &priv->version_minor,
+           &priv->version_micro);
    g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_VERSION]);
 }
 

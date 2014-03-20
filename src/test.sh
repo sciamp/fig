@@ -17,7 +17,7 @@ cd ${TEST_DIR}
 
 git init
 
-$FIG  init
+$FIG  init --name foobar --license agpl-3.0 --version 2.0.0
 git add .
 git commit -a -m 'initial commit'
 
