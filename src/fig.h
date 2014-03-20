@@ -31,6 +31,8 @@ G_BEGIN_DECLS
 #include "fig-command.h"
 #include "fig-command-info.h"
 #include "fig-command-manager.h"
+#include "fig-init-command.h"
+#include "fig-update-authors-command.h"
 #include "fig-template.h"
 #undef FIG_INSIDE
 
