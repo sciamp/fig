@@ -342,7 +342,12 @@ fig_init_command_run (FigCommand  *command,
 
    g_free (license_path);
 
-   return 0;
+   fig_command_log (command, NULL,
+                    "\n"
+                    "Run ./autogen.sh to bootstrap your project.\n"
+                    "\n");
+
+   return EXIT_SUCCESS;
 }
 
 static void

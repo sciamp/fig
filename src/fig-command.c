@@ -114,11 +114,16 @@ fig_command_log (FigCommand  *command,
    message = g_strdup_vprintf (format, args);
    va_end (args);
 
-   full = g_strdup_printf ("  %-10s %s\n", program, format);
-   g_free (message);
+   if (program) {
+      full = g_strdup_printf ("  %-10s %s\n", program, format);
+      g_free (message);
+   } else {
+      full = message;
+   }
 
    g_output_stream_write_all (command->priv->stdout_stream,
                               full, strlen (full), NULL, NULL, NULL);
+
    g_free (full);
 }
 
