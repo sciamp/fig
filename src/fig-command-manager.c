@@ -18,6 +18,7 @@
 
 #include <glib/gi18n.h>
 
+#include "fig-add-target-command.h"
 #include "fig-command-manager.h"
 #include "fig-init-command.h"
 #include "fig-update-authors-command.h"
@@ -112,6 +113,7 @@ fig_command_manager_register_builtins (FigCommandManager *manager)
 {
    const FigCommandInfo builtins [] = {
       { "init",           "Initialize a new project.",              FIG_TYPE_INIT_COMMAND },
+      { "add-target",     "Add a new target to the project.",       FIG_TYPE_ADD_TARGET_COMMAND },
       { "update-authors", "Update the AUTHORS file for a project.", FIG_TYPE_UPDATE_AUTHORS_COMMAND },
    };
    int i;
