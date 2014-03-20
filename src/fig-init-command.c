@@ -201,17 +201,32 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
    render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
 
-   render_template (command, "build/autotools/automake.d/AutomakeDocs.mk", NULL);
-   render_template (command, "build/autotools/automake.d/ChangeLog.mk", NULL);
-   render_template (command, "build/autotools/automake.d/Defaults.mk", NULL);
+   render_template (command, "build/autotools/automake/AutomakeDocs.mk", NULL);
+   render_template (command, "build/autotools/automake/ChangeLog.mk", NULL);
+   render_template (command, "build/autotools/automake/Defaults.mk", NULL);
 
+   render_template (command, "build/autotools/configure.d/20_debug.post-config", NULL);
    render_template (command, "build/autotools/configure.d/30_command_line_options.pre-am", NULL);
-   render_template (command, "build/autotools/configure.d/50_progs.post-ac", NULL);
+   render_template (command, "build/autotools/configure.d/50_ltversion.post-lt", NULL);
+   render_template (command, "build/autotools/configure.d/50_progs.post-am", NULL);
    render_template (command, "build/autotools/configure.d/50_silent_rules.post-am", NULL);
    render_template (command, "build/autotools/configure.d/50_versions.pre-ac", NULL);
    render_template (command, "build/autotools/configure.d/90_gtkdoc.post-am", NULL);
+   render_template (command, "build/autotools/configure.d/setup_libtool.m4", NULL);
+
+   render_template (command, "build/autotools/configure.d/empty.post-ac", NULL);
+   render_template (command, "build/autotools/configure.d/empty.post-am", NULL);
+   render_template (command, "build/autotools/configure.d/empty.post-config", NULL);
+   render_template (command, "build/autotools/configure.d/empty.post-lt", NULL);
+   render_template (command, "build/autotools/configure.d/empty.post-output", NULL);
+   render_template (command, "build/autotools/configure.d/empty.pre-ac", NULL);
+   render_template (command, "build/autotools/configure.d/empty.pre-am", NULL);
+   render_template (command, "build/autotools/configure.d/empty.pre-config", NULL);
+   render_template (command, "build/autotools/configure.d/empty.pre-lt", NULL);
+   render_template (command, "build/autotools/configure.d/empty.pre-output", NULL);
 
    render_template (command, "build/autotools/m4/.gitignore", NULL);
+   render_template (command, "build/autotools/m4/ax_include_wildcard.m4", NULL);
 
    g_free (license_path);
 

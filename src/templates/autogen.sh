@@ -22,6 +22,14 @@ if test -z "${AUTORECONF}"; then
     exit 1
 fi
 
+# Generate m4 sub-configure scripts for inclusion by configure.ac.
+for group in ac am config output lt; do
+    for mode in pre post; do
+        FILE="build/autotools/configure.d/${mode}-${group}.m4"
+        cat build/autotools/configure.d/*.${mode}-${group} > ${FILE}
+    done
+done
+
 # Run autoconf to build configure.
 autoreconf --force --install --verbose -I build/autotools ${ACLOCAL_FLAGS} || exit $?
 
