@@ -306,8 +306,6 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "configure.ac", NULL);
    render_template (command, ".gitignore", NULL);
 
-   render_template (command, "build/autotools/setup_libtool.m4", NULL);
-   render_template (command, "build/autotools/print_config.m4", NULL);
    render_template (command, "build/autotools/.gitignore", NULL);
 
    render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
@@ -320,13 +318,15 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/automake/ChangeLog.mk", NULL);
    render_template (command, "build/autotools/automake/Defaults.mk", NULL);
 
-   render_template (command, "build/autotools/configure.d/20_debug.post-config", NULL);
-   render_template (command, "build/autotools/configure.d/30_command_line_options.pre-am", NULL);
-   render_template (command, "build/autotools/configure.d/50_ltversion.post-lt", NULL);
-   render_template (command, "build/autotools/configure.d/50_progs.post-am", NULL);
-   render_template (command, "build/autotools/configure.d/50_silent_rules.post-am", NULL);
-   render_template (command, "build/autotools/configure.d/50_versions.pre-ac", NULL);
-   render_template (command, "build/autotools/configure.d/.gitignore", NULL);
+   render_template (command, "build/autotools/autoconf.d/setup_libtool.m4", NULL);
+   render_template (command, "build/autotools/autoconf.d/print_config.m4", NULL);
+   render_template (command, "build/autotools/autoconf.d/20_debug.post-config", NULL);
+   render_template (command, "build/autotools/autoconf.d/30_command_line_options.pre-am", NULL);
+   render_template (command, "build/autotools/autoconf.d/50_ltversion.post-lt", NULL);
+   render_template (command, "build/autotools/autoconf.d/50_progs.post-am", NULL);
+   render_template (command, "build/autotools/autoconf.d/50_silent_rules.post-am", NULL);
+   render_template (command, "build/autotools/autoconf.d/50_versions.pre-ac", NULL);
+   render_template (command, "build/autotools/autoconf.d/.gitignore", NULL);
 
    render_template (command, "build/autotools/m4/.gitignore", NULL);
 
