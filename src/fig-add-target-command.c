@@ -52,7 +52,7 @@ fig_add_target_command_get_directory (FigAddTargetCommand *command)
 
 void
 fig_add_target_command_set_directory (FigAddTargetCommand *command,
-                                 const gchar         *directory)
+                                      const gchar         *directory)
 {
    g_return_if_fail (FIG_IS_ADD_TARGET_COMMAND (command));
 
