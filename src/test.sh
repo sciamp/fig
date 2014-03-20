@@ -15,3 +15,6 @@ fi
 ./fig --project-dir "${TEST_DIR}" add-target --library foobar-1.0
 ./fig --project-dir "${TEST_DIR}" add-target --program baz
 
+cd test-dir
+./autogen.sh
+

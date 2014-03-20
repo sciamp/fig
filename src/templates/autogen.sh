@@ -1,45 +1,35 @@
-#! /bin/sh
+#!/bin/sh
 
-# Allow invocation from a separate build directory; in that case, we change
-# to the source directory to run the auto*, then change back before running configure
-srcdir=`dirname "$0"`
-test -z "$srcdir" && srcdir=.
+#
+# Run this to generate all of the initial configure scripts and Makefiles.
+#
 
-ORIGDIR=`pwd`
-cd "$srcdir" || exit 1
+# Switch to the source directory to initialize autoconf.
+olddir=`pwd`
+test -n "${srcdir}" || srcdir=`dirname "$0"`
+test -n "${srcdir}" || srcdir=.
+cd "${srcdir}"
 
-if [ ! -f README ]; then
-    ln -s README.rst README
-fi
+# Load all of our autogen scripts for various features.
+for script in build/autotools/autogen.d/*.sh; do
+    . "${script}"
+done
 
-touch ChangeLog
-touch AUTHORS
-
-if test -z "$(which libtoolize)" && test -z "$(which glibtoolize)"; then
-    echo "Error: libtoolize was not found on your system. Cannot continue."
-    if test "$(uname)" = "Darwin"; then
-        echo "On Darwin, this is named glibtoolize"
-    fi
-fi
-
-if [ -d .git ]; then
-    git submodule init
-    git submodule update
-
-    cd src/libbson
-    NOCONFIGURE=1 ./autogen.sh
-    cd ../../
-fi
-
-if test -z `which autoreconf`; then
-    echo "Error: autoreconf not found, please install it."
+# Discover the location of autoconf.
+AUTORECONF=`which autoreconf`
+if test -z "${AUTORECONF}"; then
+    echo "*** No autoreconf found, please install it ***"
     exit 1
 fi
-autoreconf --force --verbose --install -I build/autotools $ACLOCAL_FLAGS|| exit $?
+
+# Run autoconf to build configure.
+autoreconf --force --install --verbose -I build/autotools ${ACLOCAL_FLAGS} || exit $?
+
+# Remove unnecessary temporary directory from autoreconf.
 rm -rf autom4te.cache
 
-cd "$ORIGDIR" || exit 1
+# Return to the original directory.
+cd "$olddir"
 
-if test -z "$NOCONFIGURE"; then
-    "$srcdir"/configure $AUTOGEN_CONFIGURE_ARGS "$@" || exit $?
-fi
+# Unless NOCONFIGURE is set, run configure too.
+test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"

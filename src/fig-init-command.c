@@ -196,11 +196,19 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "NEWS", NULL);
    render_template (command, "README", NULL);
    render_template (command, "autogen.sh", NULL);
-   render_template (command, "build/autotools/AutomakeDocs.mk", NULL);
-   render_template (command, "build/autotools/ChangeLog.mk", NULL);
-   render_template (command, "build/autotools/Defaults.mk", NULL);
-   render_template (command, "build/autotools/m4/.gitignore", NULL);
    render_template (command, "configure.ac", NULL);
+
+   render_template (command, "build/autotools/autogen.d/git-submodule.sh", NULL);
+   render_template (command, "build/autotools/autogen.d/gtk-doc.sh", NULL);
+
+   render_template (command, "build/autotools/automake.d/AutomakeDocs.mk", NULL);
+   render_template (command, "build/autotools/automake.d/ChangeLog.mk", NULL);
+   render_template (command, "build/autotools/automake.d/Defaults.mk", NULL);
+
+   render_template (command, "build/autotools/configure.d/10_install.m4", NULL);
+   render_template (command, "build/autotools/configure.d/90_gtkdoc.m4", NULL);
+
+   render_template (command, "build/autotools/m4/.gitignore", NULL);
 
    g_free (license_path);
 
