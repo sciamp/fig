@@ -23,12 +23,14 @@
 struct _FigAddTargetCommandPrivate
 {
    gchar         *name;
+   gchar         *directory;
    FigTargetType  target_type;
 };
 
 enum
 {
    PROP_0,
+   PROP_DIRECTORY,
    PROP_NAME,
    PROP_TARGET_TYPE,
    LAST_PROP
@@ -39,6 +41,25 @@ G_DEFINE_TYPE_WITH_PRIVATE (FigAddTargetCommand,
                             FIG_TYPE_COMMAND)
 
 static GParamSpec *gParamSpecs [LAST_PROP];
+
+const gchar *
+fig_add_target_command_get_directory (FigAddTargetCommand *command)
+{
+   g_return_val_if_fail (FIG_IS_ADD_TARGET_COMMAND (command), NULL);
+
+   return command->priv->directory;
+}
+
+void
+fig_add_target_command_set_directory (FigAddTargetCommand *command,
+                                 const gchar         *directory)
+{
+   g_return_if_fail (FIG_IS_ADD_TARGET_COMMAND (command));
+
+   g_free (command->priv->directory);
+   command->priv->directory = g_strdup (directory);
+   g_object_notify_by_pspec (G_OBJECT (command), gParamSpecs [PROP_DIRECTORY]);
+}
 
 const gchar *
 fig_add_target_command_get_name (FigAddTargetCommand *command)
@@ -84,7 +105,8 @@ fig_add_target_command_finalize (GObject *object)
 
    priv = FIG_ADD_TARGET_COMMAND (object)->priv;
 
-   g_clear_object (&priv->name);
+   g_clear_pointer (&priv->name, g_free);
+   g_clear_pointer (&priv->directory, g_free);
 
    G_OBJECT_CLASS (fig_add_target_command_parent_class)->finalize (object);
 }
@@ -98,6 +120,10 @@ fig_add_target_command_get_property (GObject    *object,
    FigAddTargetCommand *command = FIG_ADD_TARGET_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_DIRECTORY:
+      g_value_set_string (value,
+                          fig_add_target_command_get_directory (command));
+      break;
    case PROP_NAME:
       g_value_set_string (value, fig_add_target_command_get_name (command));
       break;
@@ -119,6 +145,10 @@ fig_add_target_command_set_property (GObject      *object,
    FigAddTargetCommand *command = FIG_ADD_TARGET_COMMAND (object);
 
    switch (prop_id) {
+   case PROP_DIRECTORY:
+      fig_add_target_command_set_directory (command,
+                                            g_value_get_string (value));
+      break;
    case PROP_NAME:
       fig_add_target_command_set_name (command, g_value_get_string (value));
       break;
@@ -151,6 +181,16 @@ fig_add_target_command_class_init (FigAddTargetCommandClass *klass)
    g_object_class_install_property (object_class, PROP_NAME,
                                     gParamSpecs [PROP_NAME]);
 
+   gParamSpecs [PROP_DIRECTORY] =
+      g_param_spec_string ("directory",
+                           _("Directory"),
+                           _("The directory for the target."),
+                           "src",
+                           (G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS));
+   g_object_class_install_property (object_class, PROP_DIRECTORY,
+                                    gParamSpecs [PROP_DIRECTORY]);
+
    gParamSpecs [PROP_TARGET_TYPE] =
       g_param_spec_enum ("target-type",
                          _("Target Type"),
@@ -168,4 +208,5 @@ fig_add_target_command_init (FigAddTargetCommand *command)
 {
    command->priv = fig_add_target_command_get_instance_private (command);
    command->priv->target_type = FIG_TARGET_PROGRAM;
+   command->priv->directory = g_strdup ("src");
 }
