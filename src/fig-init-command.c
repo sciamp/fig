@@ -205,8 +205,11 @@ fig_init_command_run (FigCommand  *command,
    render_template (command, "build/autotools/automake.d/ChangeLog.mk", NULL);
    render_template (command, "build/autotools/automake.d/Defaults.mk", NULL);
 
-   render_template (command, "build/autotools/configure.d/10_install.m4", NULL);
-   render_template (command, "build/autotools/configure.d/90_gtkdoc.m4", NULL);
+   render_template (command, "build/autotools/configure.d/30_command_line_options.pre-am", NULL);
+   render_template (command, "build/autotools/configure.d/50_progs.post-ac", NULL);
+   render_template (command, "build/autotools/configure.d/50_silent_rules.post-am", NULL);
+   render_template (command, "build/autotools/configure.d/50_versions.pre-ac", NULL);
+   render_template (command, "build/autotools/configure.d/90_gtkdoc.post-am", NULL);
 
    render_template (command, "build/autotools/m4/.gitignore", NULL);
 

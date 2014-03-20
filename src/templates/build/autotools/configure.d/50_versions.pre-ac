@@ -1,0 +1,11 @@
+m4_define([major_version], [0])
+m4_define([minor_version], [1])
+m4_define([micro_version], [0])
+m4_define([version], [major_version.minor_version.micro_version])
+
+m4_define([interface_age], [0])
+m4_define([binary_age], [m4_eval(100 * minor_version + micro_version)])
+
+m4_define([lt_current], [m4_eval(100 * minor_version + micro_version - interface_age)])
+m4_define([lt_revision], [interface_age])
+m4_define([lt_age], [m4_eval(binary_age - interface_age)])
