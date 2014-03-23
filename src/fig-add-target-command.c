@@ -17,6 +17,7 @@
  */
 
 #include <glib/gi18n.h>
+#include <stdlib.h>
 
 #include "fig-add-target-command.h"
 
@@ -98,6 +99,26 @@ fig_add_target_command_set_target_type (FigAddTargetCommand *command,
                              gParamSpecs [PROP_TARGET_TYPE]);
 }
 
+static gint
+fig_add_target_command_run (FigCommand  *command,
+                            gint         argc,
+                            gchar      **argv)
+{
+   FigAddTargetCommandPrivate *priv;
+
+   g_assert (FIG_IS_ADD_TARGET_COMMAND (command));
+
+   priv = FIG_ADD_TARGET_COMMAND (command)->priv;
+
+   if (!priv->name) {
+      fig_command_printerr (command,
+                            "Please specify target name with --name=\n\n");
+      return EXIT_FAILURE;
+   }
+
+   return EXIT_SUCCESS;
+}
+
 static void
 fig_add_target_command_finalize (GObject *object)
 {
@@ -165,11 +186,15 @@ static void
 fig_add_target_command_class_init (FigAddTargetCommandClass *klass)
 {
    GObjectClass *object_class;
+   FigCommandClass *command_class;
 
    object_class = G_OBJECT_CLASS (klass);
    object_class->finalize = fig_add_target_command_finalize;
    object_class->get_property = fig_add_target_command_get_property;
    object_class->set_property = fig_add_target_command_set_property;
+
+   command_class = FIG_COMMAND_CLASS (klass);
+   command_class->run = fig_add_target_command_run;
 
    gParamSpecs [PROP_NAME] =
       g_param_spec_string ("name",

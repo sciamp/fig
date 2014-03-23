@@ -53,9 +53,12 @@ struct _FigCommandClass
 };
 
 GType          fig_command_get_type          (void) G_GNUC_CONST;
-GOutputStream *fig_command_get_stderr_stream (FigCommand *command);
-GOutputStream *fig_command_get_stdout_stream (FigCommand *command);
+GOutputStream *fig_command_get_stderr_stream (FigCommand  *command);
+GOutputStream *fig_command_get_stdout_stream (FigCommand  *command);
 GFile         *fig_command_get_project_dir   (FigCommand  *command);
+void           fig_command_printerr          (FigCommand  *command,
+                                              const char  *format,
+                                              ...) G_GNUC_PRINTF (2, 3);
 void           fig_command_log               (FigCommand  *command,
                                               const gchar *program,
                                               const gchar *format,

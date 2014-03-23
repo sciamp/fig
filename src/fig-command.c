@@ -127,6 +127,23 @@ fig_command_log (FigCommand  *command,
    g_free (full);
 }
 
+void
+fig_command_printerr (FigCommand *command,
+                      const char *format,
+                      ...)
+{
+   va_list args;
+   gchar *message;
+
+   va_start (args, format);
+   message = g_strdup_vprintf (format, args);
+   va_end (args);
+   g_output_stream_write_all (command->priv->stderr_stream,
+                              message, strlen (message),
+                              NULL, NULL, NULL);
+   g_free (message);
+}
+
 gint
 fig_command_run (FigCommand  *command,
                  gint         argc,
