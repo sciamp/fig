@@ -105,10 +105,57 @@ fig_add_target_command_run (FigCommand  *command,
                             gchar      **argv)
 {
    FigAddTargetCommandPrivate *priv;
+   FigAddTargetCommand *add_command = (FigAddTargetCommand *)command;
+   GOptionContext *context;
+   GError *error = NULL;
+   gchar **argv_copy;
+   gchar *name = NULL;
+   gboolean library = FALSE;
+   gboolean program = FALSE;
+   GOptionEntry entries [] = {
+      { "name", 'n', 0, G_OPTION_ARG_STRING, &name,
+        _("The name of the target."), _("NAME") },
+      { "library", 0, 0, G_OPTION_ARG_NONE, &library,
+        _("If the target should be a library.") },
+      { "program", 0, 0, G_OPTION_ARG_NONE, &program,
+        _("If the target should be a program.") },
+      { NULL }
+   };
 
    g_assert (FIG_IS_ADD_TARGET_COMMAND (command));
 
    priv = FIG_ADD_TARGET_COMMAND (command)->priv;
+
+   g_set_prgname ("fig add-target");
+
+   argv_copy = g_strdupv (argv);
+   context = g_option_context_new (NULL);
+   g_option_context_add_main_entries (context, entries, NULL);
+
+   if (!g_option_context_parse (context, &argc, &argv_copy, &error)) {
+      fig_command_printerr (command, "%s\n\n", error->message);
+      g_error_free (error);
+      g_option_context_free (context);
+      return EXIT_FAILURE;
+   }
+
+   g_option_context_free (context);
+
+   if (name) {
+      fig_add_target_command_set_name (add_command, name);
+      g_free (name);
+   }
+
+   if (program && library) {
+      fig_command_printerr (command,
+                            "Please specify either --program or --library, "
+                            "not both.\n\n");
+      return EXIT_FAILURE;
+   } else if (library) {
+      priv->target_type = FIG_TARGET_LIBRARY;
+   } else {
+      priv->target_type = FIG_TARGET_PROGRAM;
+   }
 
    if (!priv->name) {
       fig_command_printerr (command,
