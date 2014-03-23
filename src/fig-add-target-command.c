@@ -99,6 +99,58 @@ fig_add_target_command_set_target_type (FigAddTargetCommand *command,
                              gParamSpecs [PROP_TARGET_TYPE]);
 }
 
+static void
+create_mk_file_program (FigAddTargetCommand *self,
+                        GFile               *file)
+{
+}
+
+static void
+create_mk_file_library (FigAddTargetCommand *self,
+                        GFile               *file)
+{
+}
+
+static void
+create_mk_file (FigAddTargetCommand *self)
+{
+   FigAddTargetCommandPrivate *priv;
+   const gchar *directory = NULL;
+   GFile *project_dir = NULL;
+   GFile *dir = NULL;
+   GFile *mkfile = NULL;
+   gchar *mkname = NULL;
+
+   g_assert (FIG_IS_ADD_TARGET_COMMAND (self));
+
+   priv = self->priv;
+
+   mkname = g_strdup_printf ("%s.mk", priv->name);
+   g_strdelimit (mkname, " ", '_');
+
+   directory = priv->directory ? priv->directory : ".";
+   project_dir = fig_command_get_project_dir (FIG_COMMAND (self));
+   dir = g_file_get_child (project_dir, directory);
+   mkfile = g_file_get_child (dir, mkname);
+
+   if (priv->target_type == FIG_TARGET_PROGRAM) {
+      create_mk_file_program (self, mkfile);
+   } else if (priv->target_type == FIG_TARGET_LIBRARY) {
+      create_mk_file_library (self, mkfile);
+   } else {
+      g_assert_not_reached ();
+   }
+
+   g_free (mkname);
+   g_clear_object (&mkfile);
+   g_clear_object (&dir);
+}
+
+static void
+add_mk_file_to_toplevel (FigAddTargetCommand *self)
+{
+}
+
 static gint
 fig_add_target_command_run (FigCommand  *command,
                             gint         argc,
@@ -110,6 +162,7 @@ fig_add_target_command_run (FigCommand  *command,
    GError *error = NULL;
    gchar **argv_copy;
    gchar *name = NULL;
+   gchar *directory = NULL;
    gboolean library = FALSE;
    gboolean program = FALSE;
    GOptionEntry entries [] = {
@@ -119,6 +172,8 @@ fig_add_target_command_run (FigCommand  *command,
         _("If the target should be a library.") },
       { "program", 0, 0, G_OPTION_ARG_NONE, &program,
         _("If the target should be a program.") },
+      { "directory", 0, 0, G_OPTION_ARG_NONE, &directory,
+        _("The directory for the target. Defaults to current."), "DIR" },
       { NULL }
    };
 
@@ -146,6 +201,11 @@ fig_add_target_command_run (FigCommand  *command,
       g_free (name);
    }
 
+   if (directory) {
+      fig_add_target_command_set_directory (add_command, name);
+      g_free (directory);
+   }
+
    if (program && library) {
       fig_command_printerr (command,
                             "Please specify either --program or --library, "
@@ -162,6 +222,9 @@ fig_add_target_command_run (FigCommand  *command,
                             "Please specify target name with --name=\n\n");
       return EXIT_FAILURE;
    }
+
+   create_mk_file (add_command);
+   add_mk_file_to_toplevel (add_command);
 
    return EXIT_SUCCESS;
 }
