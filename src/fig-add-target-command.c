@@ -103,12 +103,22 @@ static void
 create_mk_file_program (FigAddTargetCommand *self,
                         GFile               *file)
 {
+   g_file_replace_contents (file, "", 0, NULL, FALSE, 0, NULL, NULL, NULL);
 }
 
 static void
 create_mk_file_library (FigAddTargetCommand *self,
                         GFile               *file)
 {
+   GFile *project_dir;
+   gchar *path;
+
+   project_dir = fig_command_get_project_dir (FIG_COMMAND (self));
+   path = g_file_get_relative_path (project_dir, file);
+   fig_command_log (FIG_COMMAND (self), "GEN", path);
+   g_free (path);
+
+   g_file_replace_contents (file, "", 0, NULL, FALSE, 0, NULL, NULL, NULL);
 }
 
 static void
@@ -161,13 +171,10 @@ fig_add_target_command_run (FigCommand  *command,
    GOptionContext *context;
    GError *error = NULL;
    gchar **argv_copy;
-   gchar *name = NULL;
    gchar *directory = NULL;
    gboolean library = FALSE;
    gboolean program = FALSE;
    GOptionEntry entries [] = {
-      { "name", 'n', 0, G_OPTION_ARG_STRING, &name,
-        _("The name of the target."), _("NAME") },
       { "library", 0, 0, G_OPTION_ARG_NONE, &library,
         _("If the target should be a library.") },
       { "program", 0, 0, G_OPTION_ARG_NONE, &program,
@@ -194,15 +201,16 @@ fig_add_target_command_run (FigCommand  *command,
       return EXIT_FAILURE;
    }
 
-   g_option_context_free (context);
-
-   if (name) {
-      fig_add_target_command_set_name (add_command, name);
-      g_free (name);
+   if (argc > 1 && argv_copy [1]) {
+      fig_add_target_command_set_name (add_command, argv_copy [1]);
    }
 
+   g_option_context_free (context);
+
+   g_strdupv (argv_copy);
+
    if (directory) {
-      fig_add_target_command_set_directory (add_command, name);
+      fig_add_target_command_set_directory (add_command, directory);
       g_free (directory);
    }
 
