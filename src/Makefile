@@ -20,6 +20,7 @@ LIBS = $(shell pkg-config --libs $(PKGS)) \
 OBJS = \
 	fig-cli.o \
 	fig-add-target-command.o \
+	fig-am-script.o \
 	fig-command.o \
 	fig-command-info.o \
 	fig-command-manager.o \
