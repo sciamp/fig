@@ -100,9 +100,24 @@ fig_add_target_command_set_target_type (FigAddTargetCommand *command,
 }
 
 static void
+print_gen (FigAddTargetCommand *self,
+           GFile               *path)
+{
+   GFile *pdir;
+   gchar *str;
+
+   pdir = fig_command_get_project_dir (FIG_COMMAND (self));
+   str = g_file_get_relative_path (pdir, path);
+   fig_command_log (FIG_COMMAND (self), "GEN", "%s", str);
+   g_free (str);
+}
+
+static void
 create_mk_file_program (FigAddTargetCommand *self,
                         GFile               *file)
 {
+   print_gen (self, file);
+
    g_file_replace_contents (file, "", 0, NULL, FALSE, 0, NULL, NULL, NULL);
 }
 
@@ -110,13 +125,7 @@ static void
 create_mk_file_library (FigAddTargetCommand *self,
                         GFile               *file)
 {
-   GFile *project_dir;
-   gchar *path;
-
-   project_dir = fig_command_get_project_dir (FIG_COMMAND (self));
-   path = g_file_get_relative_path (project_dir, file);
-   fig_command_log (FIG_COMMAND (self), "GEN", path);
-   g_free (path);
+   print_gen (self, file);
 
    g_file_replace_contents (file, "", 0, NULL, FALSE, 0, NULL, NULL, NULL);
 }
@@ -135,13 +144,19 @@ create_mk_file (FigAddTargetCommand *self)
 
    priv = self->priv;
 
-   mkname = g_strdup_printf ("%s.mk", priv->name);
+   mkname = g_strdup_printf ("%s.am", priv->name);
    g_strdelimit (mkname, " ", '_');
 
    directory = priv->directory ? priv->directory : ".";
    project_dir = fig_command_get_project_dir (FIG_COMMAND (self));
    dir = g_file_get_child (project_dir, directory);
    mkfile = g_file_get_child (dir, mkname);
+
+   g_assert (G_IS_FILE (dir));
+
+   if (!g_file_query_exists (dir, NULL)) {
+      g_file_make_directory (dir, NULL, NULL);
+   }
 
    if (priv->target_type == FIG_TARGET_PROGRAM) {
       create_mk_file_program (self, mkfile);
@@ -179,7 +194,7 @@ fig_add_target_command_run (FigCommand  *command,
         _("If the target should be a library.") },
       { "program", 0, 0, G_OPTION_ARG_NONE, &program,
         _("If the target should be a program.") },
-      { "directory", 0, 0, G_OPTION_ARG_NONE, &directory,
+      { "directory", 0, 0, G_OPTION_ARG_STRING, &directory,
         _("The directory for the target. Defaults to current."), "DIR" },
       { NULL }
    };
