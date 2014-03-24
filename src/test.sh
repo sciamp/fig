@@ -21,8 +21,8 @@ $FIG  init --name foobar --license agpl-3.0 --version 2.0.0
 git add .
 git commit -a -m 'initial commit'
 
-$FIG add-target --library foobar-1.0
-$FIG add-target --program baz
+$FIG add-target --library foobar-1.0 --directory foobar
+$FIG add-target --program baz --directory baz
 
 $FIG update-authors
 git add .
