@@ -115,7 +115,7 @@ fig_command_log (FigCommand  *command,
    va_end (args);
 
    if (program) {
-      full = g_strdup_printf ("  %-10s %s\n", program, format);
+      full = g_strdup_printf ("  %-10s %s\n", program, message);
       g_free (message);
    } else {
       full = message;
