@@ -171,6 +171,9 @@ fig_cli_print_help (FigCli        *cli,
                          "  fig --project-dir=foo init\n"
                          "\n");
 
+   g_string_append (str, "See 'fig <command> --help' to read more about a specific\n"
+                         "command and its options.\n");
+
    g_output_stream_write_all (stream, str->str, str->len, NULL, NULL, NULL);
    g_string_free (str, TRUE);
 }
